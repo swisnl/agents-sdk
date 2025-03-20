@@ -27,6 +27,7 @@
         "ramsey/uuid": "^4.7"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.73",
         "guzzlehttp/guzzle": "^7.3",
         "laravel/prompts": "^0.3.5",
         "phpstan/phpstan": "^2.1",

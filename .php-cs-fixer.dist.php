@@ -25,6 +25,7 @@ return (new PhpCsFixer\Config())
         ],
         'phpdoc_single_line_var_spacing' => true,
         'phpdoc_var_without_name' => true,
+        'not_operator_with_space' => false,
         'class_attributes_separation' => [
             'elements' => [
                 'method' => 'one',

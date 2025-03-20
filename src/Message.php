@@ -8,7 +8,7 @@ use Swis\Agents\Interfaces\MessageInterface;
 
 /**
  * Represents a message in an agent conversation.
- * 
+ *
  * This class implements the core message structure used throughout the agent system.
  * Messages have a role (system, user, assistant, tool), content, and optional
  * parameters. Messages can also track token usage and be associated with an owner agent.
@@ -22,7 +22,7 @@ class Message implements MessageInterface, JsonSerializable
     public const ROLE_ASSISTANT = 'assistant'; // AI-generated responses
     public const ROLE_USER = 'user';           // Human/user inputs
     public const ROLE_TOOL = 'tool';           // Tool execution results
-    
+
     /**
      * The agent that initiated this message, if applicable.
      */
@@ -43,8 +43,7 @@ class Message implements MessageInterface, JsonSerializable
         protected array $parameters = [],
         protected ?int $inputTokens = null,
         protected ?int $outputTokens = null,
-    )
-    {
+    ) {
     }
 
     /**
@@ -69,7 +68,7 @@ class Message implements MessageInterface, JsonSerializable
 
     /**
      * Associate this message with an owner agent.
-     * 
+     *
      * Sets the agent that initiated this message.
      *
      * @param AgentInterface|null $owner The agent that created this message
@@ -94,7 +93,7 @@ class Message implements MessageInterface, JsonSerializable
 
     /**
      * Get token usage statistics for this message.
-     * 
+     *
      * Returns the input and output token counts for tracking usage and costs.
      *
      * @return array<string, int|null> Token usage statistics
@@ -109,7 +108,7 @@ class Message implements MessageInterface, JsonSerializable
 
     /**
      * Prepare the message for JSON serialization.
-     * 
+     *
      * Formats the message in a structure suitable for LLM API requests,
      * including any additional parameters specific to the message type.
      *
@@ -120,13 +119,13 @@ class Message implements MessageInterface, JsonSerializable
         return [
             'role' => $this->role,
             'content' => $this->content,
-            ...$this->parameters
+            ...$this->parameters,
         ];
     }
 
     /**
      * Convert the message to a string.
-     * 
+     *
      * Returns the message content or an empty string if content is null.
      *
      * @return string The message content

@@ -7,7 +7,7 @@ use JsonSerializable;
 
 /**
  * Represents a complete trace of an agent workflow execution.
- * 
+ *
  * A trace is the top-level container for spans that record the activities
  * within an agent-based workflow. It provides context for all spans that
  * belong to the same execution flow.
@@ -27,14 +27,13 @@ class Trace implements JsonSerializable
         public ?string $id = null,
         public ?string $groupId = null,
         public array   $metaData = [],
-    )
-    {
+    ) {
         $this->id = $this->id ?? sprintf('trace_%s', Str::uuid());
     }
 
     /**
      * Convert trace to array format suitable for JSON serialization.
-     * 
+     *
      * This method formats the trace data according to the OpenAI
      * traces API specification.
      *

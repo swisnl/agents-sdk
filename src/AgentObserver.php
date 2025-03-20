@@ -2,17 +2,17 @@
 
 namespace Swis\Agents;
 
+use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\Payload;
 use Swis\Agents\Response\ToolCall;
-use Swis\Agents\Interfaces\AgentInterface;
 
 /**
  * Base AgentObserver class for monitoring and responding to agent lifecycle events.
- * 
+ *
  * This abstract class defines the observer interface for agent events.
- * Implementations can extend this class to add behavior at various points 
+ * Implementations can extend this class to add behavior at various points
  * in the agent lifecycle, such as when responses are generated, tools are called,
  * or handoffs occur between agents.
  */

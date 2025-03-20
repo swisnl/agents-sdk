@@ -4,17 +4,17 @@ namespace Swis\Agents;
 
 use Closure;
 use OpenAI\Contracts\ClientContract;
+use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Interfaces\TracingProcessorInterface;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Orchestrator\StreamedAgentObserver;
-use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Tracing\OpenAIExporter;
 use Swis\Agents\Tracing\Processor;
 
 /**
  * Orchestrator class for managing agent workflows and interactions.
- * 
+ *
  * The Orchestrator is responsible for:
  * - Managing and running agents
  * - Managing the run context and conversation flow
@@ -26,12 +26,12 @@ class Orchestrator
      * The default role for agent messages
      */
     protected string $agentRole = Message::ROLE_ASSISTANT;
-    
+
     /**
      * Whether tracing is enabled for this orchestration
      */
     protected bool $tracingEnabled = true;
-    
+
     /**
      * The processor responsible for tracing and exporting spans
      */
@@ -44,7 +44,7 @@ class Orchestrator
      * @param RunContext|null $context Optional run context (will be created if not provided)
      */
     public function __construct(
-        protected ?string $name = null, 
+        protected ?string $name = null,
         public ?RunContext $context = null
     ) {
         $this->context = $context ?? new RunContext();
@@ -64,6 +64,7 @@ class Orchestrator
     public function withClient(ClientContract $client): self
     {
         $this->context->withClient($client);
+
         return $this;
     }
 
@@ -75,6 +76,7 @@ class Orchestrator
     public function enableTracing(): self
     {
         $this->tracingEnabled = true;
+
         return $this;
     }
 
@@ -86,6 +88,7 @@ class Orchestrator
     public function disableTracing(): self
     {
         $this->tracingEnabled = false;
+
         return $this;
     }
 
@@ -98,6 +101,7 @@ class Orchestrator
     public function withTracingProcessor(TracingProcessorInterface $processor): self
     {
         $this->tracingProcessor = $processor;
+
         return $this;
     }
 
@@ -110,6 +114,7 @@ class Orchestrator
     public function withUserInstruction(string $instruction): self
     {
         $this->context->addUserMessage($instruction);
+
         return $this;
     }
 
@@ -122,6 +127,7 @@ class Orchestrator
     public function withAgentObserver(AgentObserver $observer): self
     {
         $this->context->withAgentObserver($observer);
+
         return $this;
     }
 
@@ -134,6 +140,7 @@ class Orchestrator
     public function withToolObserver(ToolObserver $observer): self
     {
         $this->context->withToolObserver($observer);
+
         return $this;
     }
 
@@ -146,6 +153,7 @@ class Orchestrator
     public function withAgentRole(string $agentRole): self
     {
         $this->agentRole = $agentRole;
+
         return $this;
     }
 
@@ -211,16 +219,16 @@ class Orchestrator
      */
     protected function prepareTrace(): void
     {
-        if (!$this->tracingEnabled || $this->tracingProcessor?->isStarted()) {
+        if (! $this->tracingEnabled || $this->tracingProcessor?->isStarted()) {
             return;
         }
 
         // Use the default processor if none was provided
         $this->tracingProcessor = $this->tracingProcessor ?? new Processor(
-            new OpenAIExporter(), 
+            new OpenAIExporter(),
             $this->context
         );
-        
+
         $this->tracingProcessor->start($this->name ?? 'Unnamed Workflow');
     }
 }

@@ -13,15 +13,15 @@ use Swis\Agents\ToolObserver;
 
 /**
  * RunContext class for managing the execution context of an agent workflow.
- * 
+ *
  * This class is responsible for:
  * - Maintaining the conversation history
  * - Managing OpenAI client configuration
  * - Registering and managing observers
  * - Handling message creation and management
  */
-class RunContext {
-
+class RunContext
+{
     /**
      * The OpenAI client instance
      */
@@ -29,21 +29,21 @@ class RunContext {
 
     /**
      * The conversation history of messages
-     * 
+     *
      * @var array<MessageInterface>
      */
     protected array $conversation = [];
 
     /**
      * Registered agent observers
-     * 
+     *
      * @var array<AgentObserver>
      */
     protected array $agentObservers = [];
 
     /**
      * Registered tool observers
-     * 
+     *
      * @var array<ToolObserver>
      */
     protected array $toolObservers = [];
@@ -52,7 +52,7 @@ class RunContext {
      * Whether responses should be streamed
      */
     protected bool $isStreamed = false;
-    
+
     /**
      * The observer invoker instance
      */
@@ -75,47 +75,52 @@ class RunContext {
 
     /**
      * Enable or disable streaming for responses
-     * 
+     *
      * @param bool $streamed Whether to stream responses
      * @return self
      */
     public function streamed(bool $streamed = true): self
     {
         $this->isStreamed = $streamed;
+
         return $this;
     }
 
     /**
      * Set the OpenAI client to use
-     * 
+     *
      * @param ClientContract $client The OpenAI client
      * @return self
      */
     public function withClient(ClientContract $client): self
     {
         $this->client = $client;
+
         return $this;
     }
 
     /**
      * Add a user message to the conversation
-     * 
+     *
      * @param string $message The message content
      * @return self
      */
-    public function addUserMessage(string $message): self {
+    public function addUserMessage(string $message): self
+    {
         $this->addMessage(new Message(Message::ROLE_USER, $message));
+
         return $this;
     }
 
     /**
      * Add an agent message to the conversation
-     * 
+     *
      * @param string|Payload $message The message content or payload
      * @param AgentInterface $owner The agent that generated this message
      * @return self
      */
-    public function addAgentMessage(string|Payload $message, AgentInterface $owner): self {
+    public function addAgentMessage(string|Payload $message, AgentInterface $owner): self
+    {
         $messageInstance = new Message(
             role: Message::ROLE_ASSISTANT,
             content: (string) $message,
@@ -132,7 +137,7 @@ class RunContext {
 
     /**
      * Convert a payload to a message instance
-     * 
+     *
      * @param Payload $payload The payload to convert
      * @param string $role The role for the message
      * @return Message The created message
@@ -149,17 +154,18 @@ class RunContext {
 
     /**
      * Set or replace the system message in the conversation
-     * 
+     *
      * @param string $message The system message content
      * @return self
      */
-    public function withSystemMessage(string $message): self {
+    public function withSystemMessage(string $message): self
+    {
         // Remove any existing system messages
         $this->conversation = array_values(array_filter(
-            $this->conversation, 
+            $this->conversation,
             fn (MessageInterface $message) => $message->role() !== Message::ROLE_SYSTEM
         ));
-        
+
         // Add the new system message at the beginning
         array_unshift($this->conversation, new Message(Message::ROLE_SYSTEM, $message));
 
@@ -168,25 +174,28 @@ class RunContext {
 
     /**
      * Add one or more agent observers
-     * 
+     *
      * @param AgentObserver ...$observer The observers to add
      * @return self
      */
-    public function withAgentObserver(AgentObserver ...$observer): self {
+    public function withAgentObserver(AgentObserver ...$observer): self
+    {
         $this->agentObservers = array_merge($this->agentObservers, $observer);
+
         return $this;
     }
 
     /**
      * Remove agent observers by class name
-     * 
+     *
      * @param string $observerClass The class of observers to remove
      * @return self
      */
-    public function removeAgentObserver(string $observerClass): self {
+    public function removeAgentObserver(string $observerClass): self
+    {
         $this->agentObservers = array_filter(
-            $this->agentObservers, 
-            fn (AgentObserver $observer) => !is_a($observer, $observerClass)
+            $this->agentObservers,
+            fn (AgentObserver $observer) => ! is_a($observer, $observerClass)
         );
 
         return $this;
@@ -194,25 +203,28 @@ class RunContext {
 
     /**
      * Add one or more tool observers
-     * 
+     *
      * @param ToolObserver ...$observer The observers to add
      * @return self
      */
-    public function withToolObserver(ToolObserver ...$observer): self {
+    public function withToolObserver(ToolObserver ...$observer): self
+    {
         $this->toolObservers = array_merge($this->toolObservers, $observer);
+
         return $this;
     }
 
     /**
      * Remove tool observers by class name
-     * 
+     *
      * @param string $observerClass The class of observers to remove
      * @return self
      */
-    public function removeToolObserver(string $observerClass): self {
+    public function removeToolObserver(string $observerClass): self
+    {
         $this->toolObservers = array_filter(
-            $this->toolObservers, 
-            fn (ToolObserver $observer) => !is_a($observer, $observerClass)
+            $this->toolObservers,
+            fn (ToolObserver $observer) => ! is_a($observer, $observerClass)
         );
 
         return $this;
@@ -220,24 +232,26 @@ class RunContext {
 
     /**
      * Set a custom observer invoker
-     * 
+     *
      * @param ObserverInvoker $observerInvoker The observer invoker to use
      * @return self
      */
     public function withObserverInvoker(ObserverInvoker $observerInvoker): self
     {
         $this->observerInvoker = $observerInvoker;
+
         return $this;
     }
 
     /**
      * Add a message to the conversation
-     * 
+     *
      * @param MessageInterface $message The message to add
      * @param AgentInterface|null $owner The owner agent (if applicable)
      * @return void
      */
-    public function addMessage(MessageInterface $message, ?AgentInterface $owner = null): void {
+    public function addMessage(MessageInterface $message, ?AgentInterface $owner = null): void
+    {
         if (isset($owner)) {
             $message->withOwner($owner);
         }
@@ -247,61 +261,67 @@ class RunContext {
 
     /**
      * Get the OpenAI client
-     * 
+     *
      * @return ClientContract The client
      */
-    public function client(): ClientContract {
+    public function client(): ClientContract
+    {
         return $this->client;
     }
 
     /**
      * Check if streaming is enabled
-     * 
+     *
      * @return bool Whether streaming is enabled
      */
-    public function isStreamed(): bool {
+    public function isStreamed(): bool
+    {
         return $this->isStreamed;
     }
 
     /**
      * Get the full conversation history
-     * 
+     *
      * @return array<MessageInterface> The conversation
      */
-    public function conversation(): array {
+    public function conversation(): array
+    {
         return $this->conversation;
     }
 
     /**
      * Get the last message in the conversation
-     * 
+     *
      * @return MessageInterface|null The last message, or null if none
      */
-    public function lastMessage(): ?MessageInterface {
+    public function lastMessage(): ?MessageInterface
+    {
         return end($this->conversation);
     }
 
     /**
      * Get all registered agent observers
-     * 
+     *
      * @return array<AgentObserver> The agent observers
      */
-    public function agentObservers(): array {
+    public function agentObservers(): array
+    {
         return $this->agentObservers;
     }
 
     /**
      * Get all registered tool observers
-     * 
+     *
      * @return array<ToolObserver> The tool observers
      */
-    public function toolObservers(): array {
+    public function toolObservers(): array
+    {
         return $this->toolObservers;
     }
 
     /**
      * Get the observer invoker
-     * 
+     *
      * @return ObserverInvoker The observer invoker
      */
     public function observerInvoker(): ObserverInvoker

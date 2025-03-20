@@ -12,8 +12,8 @@ class StreamAgentTest extends BaseOrchestratorTestCase
         $agent = new Agent('Stream Agent');
 
         $tokenCount = 0;
-        $response = $this->orchestrator->runStreamed($agent, function(Payload $token) use (&$tokenCount) {
-            if (!isset($token->content)) {
+        $response = $this->orchestrator->runStreamed($agent, function (Payload $token) use (&$tokenCount) {
+            if (! isset($token->content)) {
                 return;
             }
 

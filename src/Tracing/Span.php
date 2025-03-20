@@ -8,7 +8,7 @@ use JsonSerializable;
 
 /**
  * Represents a single unit of work within a trace.
- * 
+ *
  * Spans record the execution details of individual operations within an agent workflow,
  * such as tool calls, message generation, or agent handoffs. Each span has timing
  * information, can be nested within parent spans, and contains execution data
@@ -20,12 +20,12 @@ class Span implements JsonSerializable
      * Start time of the span in microseconds
      */
     private float $startTime;
-    
+
     /**
      * End time of the span in microseconds
      */
     private float $stopTime;
-    
+
     /**
      * Optional error message if the span operation failed
      */
@@ -44,14 +44,13 @@ class Span implements JsonSerializable
         public ?string $parentId = null,
         public ?string $id = null,
         public array   $spanData = [],
-    )
-    {
+    ) {
         $this->id = $this->id ?? sprintf('span_%s', Str::uuid());
     }
 
     /**
      * Manually set the start time of the span.
-     * 
+     *
      * Useful for creating spans after the operation has already started.
      *
      * @param float $startTime Timestamp in microseconds
@@ -140,7 +139,7 @@ class Span implements JsonSerializable
 
     /**
      * Convert span to array format suitable for JSON serialization.
-     * 
+     *
      * This method formats the span data according to the OpenAI
      * traces API specification, automatically stopping the span
      * if it hasn't been stopped yet.

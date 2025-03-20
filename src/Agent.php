@@ -5,16 +5,16 @@ namespace Swis\Agents;
 use Closure;
 use OpenAI\Responses\Chat\CreateResponse;
 use Swis\Agents\Exceptions\ModelBehaviorException;
+use Swis\Agents\Interfaces\AgentInterface;
+use Swis\Agents\Model\ModelSettings;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\Payload;
 use Swis\Agents\Response\StreamedResponseWrapper;
-use Swis\Agents\Interfaces\AgentInterface;
-use Swis\Agents\Model\ModelSettings;
 use Swis\Agents\Traits\HasToolCallingTrait;
 
 /**
  * Agent class is the core component of the Agents SDK
- * 
+ *
  * An Agent encapsulates a specific role or capability with its own name, instructions,
  * tools, and settings. It can interact with an LLM to process inputs and generate appropriate
  * responses. Agents can also transfer control to other agents (handoffs) when specific
@@ -28,7 +28,7 @@ class Agent implements AgentInterface
      * The orchestrator that manages this agent and handles messaging
      */
     protected Orchestrator $orchestrator;
-    
+
     /**
      * Custom instruction for handoffs, if null uses default
      */
@@ -36,21 +36,21 @@ class Agent implements AgentInterface
 
     /**
      * Collection of tools available to this agent
-     * 
+     *
      * @var array<string, Tool>
      */
     protected array $tools = [];
 
     /**
      * Collection of other agents that this agent can hand off to
-     * 
+     *
      * @var array<string, Handoff|Agent>
      */
     protected array $handoffs = [];
 
     /**
      * Creates a new Agent instance
-     * 
+     *
      * @param string|Closure $name The name of the agent
      * @param string|Closure $description Short description of the agent's purpose
      * @param string|Closure $instruction System instructions for the LLM
@@ -66,83 +66,88 @@ class Agent implements AgentInterface
         array $tools = [],
         array $handoffs = []
     ) {
-        if (!empty($tools)) {
+        if (! empty($tools)) {
             $this->withTool(...$tools);
         }
 
-        if (!empty($handoffs)) {
+        if (! empty($handoffs)) {
             $this->withHandoff(...$handoffs);
         }
     }
-    
+
     /**
      * Sets the orchestrator for this agent
-     * 
+     *
      * The orchestrator manages the agent's context and messaging flow
      */
     public function setOrchestrator(Orchestrator $orchestrator): void
     {
         $this->orchestrator = $orchestrator;
     }
-    
+
     /**
      * Sets the agent's name
-     * 
+     *
      * @param string|Closure $name The name or a closure that returns the name
      */
     public function withName(string|Closure $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
     /**
      * Sets the agent's description
-     * 
+     *
      * @param string|Closure $description The description or a closure that returns it
      */
     public function withDescription(string|Closure $description): self
     {
         $this->description = $description;
+
         return $this;
     }
 
     /**
      * Sets the agent's system instruction for the LLM
-     * 
+     *
      * @param string|Closure $instruction The instruction or a closure that returns it
      */
     public function withInstruction(string|Closure $instruction): self
     {
         $this->instruction = $instruction;
+
         return $this;
     }
 
     /**
      * Sets the model settings for the LLM
-     * 
+     *
      * @param ModelSettings|Closure $modelSettings The settings or a closure that returns them
      */
     public function withModelSettings(ModelSettings|Closure $modelSettings): self
     {
         $this->modelSettings = $modelSettings;
+
         return $this;
     }
 
     /**
      * Sets a custom handoff instruction
-     * 
+     *
      * @param string $handoffInstruction The custom instruction for handoffs
      */
     public function withHandoffInstruction(string $handoffInstruction): self
     {
         $this->handoffInstruction = $handoffInstruction;
+
         return $this;
     }
-    
+
     /**
      * Gets the agent's name
-     * 
+     *
      * @return string The resolved name
      */
     public function name(): string
@@ -152,7 +157,7 @@ class Agent implements AgentInterface
 
     /**
      * Gets the agent's description
-     * 
+     *
      * @return string The resolved description
      */
     public function description(): string
@@ -162,7 +167,7 @@ class Agent implements AgentInterface
 
     /**
      * Gets the agent's system instruction
-     * 
+     *
      * @return string The resolved instruction
      */
     public function instruction(): string
@@ -172,7 +177,7 @@ class Agent implements AgentInterface
 
     /**
      * Gets the agent's model settings
-     * 
+     *
      * @return ModelSettings The resolved model settings
      */
     public function modelSettings(): ModelSettings
@@ -186,17 +191,17 @@ class Agent implements AgentInterface
 
     /**
      * Gets the handoff instruction, falling back to default if not set
-     * 
+     *
      * @return string The handoff instruction
      */
     public function handoffInstruction(): string
     {
         return $this->handoffInstruction ?? $this->defaultHandoffInstruction();
     }
-    
+
     /**
      * Adds one or more tools to this agent
-     * 
+     *
      * @param Tool ...$tools The tools to add
      */
     public function withTool(Tool ...$tools): self
@@ -207,12 +212,13 @@ class Agent implements AgentInterface
         }
 
         $this->tools = array_merge($this->tools, $keyedTools);
+
         return $this;
     }
 
     /**
      * Adds one or more handoff agents
-     * 
+     *
      * @param Handoff|Agent ...$handoffs The agents to add as handoff targets
      */
     public function withHandoff(Handoff|Agent ...$handoffs): self
@@ -223,12 +229,13 @@ class Agent implements AgentInterface
         }
 
         $this->handoffs = array_merge($this->handoffs, $keyedHandoffs);
+
         return $this;
     }
 
     /**
      * Gets all tools registered with this agent
-     * 
+     *
      * @return array<string, Tool> The registered tools
      */
     public function tools(): array
@@ -238,17 +245,17 @@ class Agent implements AgentInterface
 
     /**
      * Gets all handoffs registered with this agent
-     * 
+     *
      * @return array<string, Handoff|Agent> The registered handoffs
      */
     public function handoffs(): array
     {
         return $this->handoffs;
     }
-    
+
     /**
      * Invokes the agent, sending a request to the LLM and processing the response
-     * 
+     *
      * This method prepares the context, builds the request payload, and handles
      * the LLM response, including streaming if enabled.
      */
@@ -264,6 +271,7 @@ class Agent implements AgentInterface
         try {
             if ($context->isStreamed()) {
                 $this->invokeStreamed($context, $payload);
+
                 return;
             }
 
@@ -275,10 +283,10 @@ class Agent implements AgentInterface
             $this->invoke();
         }
     }
-    
+
     /**
      * Builds the LLM request payload
-     * 
+     *
      * @param RunContext $context The current run context
      * @return array The complete payload for the LLM request
      */
@@ -296,7 +304,7 @@ class Agent implements AgentInterface
         ];
 
         $tools = $this->buildToolsPayload($this->executableTools());
-        if (!empty($tools)) {
+        if (! empty($tools)) {
             $payload['tools'] = $tools;
         }
 
@@ -309,23 +317,23 @@ class Agent implements AgentInterface
 
     /**
      * Prepares the instruction by combining handoff instruction if needed
-     * 
+     *
      * @return string The complete instruction for the LLM
      */
     protected function prepareInstruction(): string
     {
         $instruction = $this->instruction();
-        
-        if (!empty($this->handoffs)) {
+
+        if (! empty($this->handoffs)) {
             $instruction = sprintf("%s\n\n%s", $this->handoffInstruction(), $instruction);
         }
-        
+
         return $instruction;
     }
 
     /**
      * Invokes the LLM (non-streamed)
-     * 
+     *
      * @param RunContext|null $context The current run context
      * @param array $payload The request payload
      */
@@ -340,7 +348,7 @@ class Agent implements AgentInterface
 
     /**
      * Invokes the LLM with streaming enabled
-     * 
+     *
      * @param RunContext $context The current run context
      * @param array $payload The request payload
      */
@@ -354,7 +362,7 @@ class Agent implements AgentInterface
 
         $message = '';
         $lastPayload = null;
-        
+
         // Process each token of the streamed response
         foreach ($streamedResponse as $responsePayload) {
             $context->observerInvoker()->agentOnResponseInterval($context, $this, $responsePayload);
@@ -367,7 +375,7 @@ class Agent implements AgentInterface
         }
 
         // After receiving all tokens, create the complete message
-        if (!empty($message) && isset($lastPayload)) {
+        if (! empty($message) && isset($lastPayload)) {
             $lastPayload->content = $message;
             $context->addAgentMessage($lastPayload, $this);
             $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
@@ -376,7 +384,7 @@ class Agent implements AgentInterface
 
     /**
      * Handles the response from the LLM
-     * 
+     *
      * @param RunContext|null $context The current run context
      * @param CreateResponse $response The response from the LLM
      */
@@ -384,6 +392,7 @@ class Agent implements AgentInterface
     {
         if ($this->isToolCall($response)) {
             $this->handleToolCallResponse($response);
+
             return;
         }
 
@@ -403,7 +412,7 @@ class Agent implements AgentInterface
 
     /**
      * Handles a tool call response from the LLM
-     * 
+     *
      * @param CreateResponse $response The response containing tool calls
      */
     protected function handleToolCallResponse(CreateResponse $response): void
@@ -425,7 +434,7 @@ class Agent implements AgentInterface
 
     /**
      * Gets all executable tools, including tools for handoffs
-     * 
+     *
      * @return array<Tool> The complete list of tools
      */
     protected function executableTools(): array
@@ -435,7 +444,7 @@ class Agent implements AgentInterface
 
     /**
      * Builds tools for each handoff agent
-     * 
+     *
      * @return array<string, Tool> The handoff tools
      */
     protected function buildHandoffTools(): array
@@ -456,9 +465,9 @@ class Agent implements AgentInterface
 
     /**
      * Provides the default handoff instruction
-     * 
+     *
      * This explains the multi-agent system to the LLM and how handoffs work.
-     * 
+     *
      * @return string The default handoff instruction
      */
     protected function defaultHandoffInstruction(): string
@@ -475,7 +484,7 @@ PROMPT;
 
     /**
      * Helper method to resolve a closure or return a string value
-     * 
+     *
      * @param string|Closure $value The value or closure to resolve
      * @return string The resolved string value
      */

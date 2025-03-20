@@ -11,7 +11,7 @@ use Swis\Agents\Tool;
 
 /**
  * TraceAgentObserver class for generating and managing execution traces.
- * 
+ *
  * This observer creates spans for various agent lifecycle events, allowing
  * for detailed tracing of agent execution flows, including message generation,
  * tool calls, and agent handoffs.
@@ -22,7 +22,7 @@ class TraceAgentObserver extends AgentObserver
      * The active span for the current agent
      */
     protected ?Span $currentAgentSpan = null;
-    
+
     /**
      * Reference to the current active agent
      */
@@ -30,7 +30,7 @@ class TraceAgentObserver extends AgentObserver
 
     /**
      * Create a new trace agent observer
-     * 
+     *
      * @param Processor $processor The trace processor to use
      */
     public function __construct(protected Processor $processor)
@@ -39,7 +39,7 @@ class TraceAgentObserver extends AgentObserver
 
     /**
      * Start a new span when an agent is invoked
-     * 
+     *
      * @param AgentInterface $agent The agent being invoked
      * @param RunContext $context The execution context
      * @return void
@@ -47,7 +47,7 @@ class TraceAgentObserver extends AgentObserver
     public function beforeInvoke(AgentInterface $agent, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace) {
+        if (! $trace) {
             return;
         }
 
@@ -69,7 +69,7 @@ class TraceAgentObserver extends AgentObserver
 
     /**
      * Create a span for agent response generation
-     * 
+     *
      * @param AgentInterface $agent The agent that generated the response
      * @param MessageInterface $message The generated message
      * @param RunContext $context The execution context
@@ -78,7 +78,7 @@ class TraceAgentObserver extends AgentObserver
     public function onResponse(AgentInterface $agent, MessageInterface $message, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace || !$this->currentAgentSpan) {
+        if (! $trace || ! $this->currentAgentSpan) {
             return;
         }
 
@@ -91,7 +91,7 @@ class TraceAgentObserver extends AgentObserver
 
     /**
      * Create a span for agent handoff events
-     * 
+     *
      * @param AgentInterface $agent The agent handing off the conversation
      * @param AgentInterface $handoffToAgent The agent receiving the handoff
      * @param RunContext $context The execution context
@@ -100,7 +100,7 @@ class TraceAgentObserver extends AgentObserver
     public function beforeHandoff(AgentInterface $agent, AgentInterface $handoffToAgent, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace || !$this->currentAgentSpan) {
+        if (! $trace || ! $this->currentAgentSpan) {
             return;
         }
 
@@ -113,7 +113,7 @@ class TraceAgentObserver extends AgentObserver
 
     /**
      * Start a span for tool call operations
-     * 
+     *
      * @param AgentInterface $agent The agent initiating the tool call
      * @param Tool $tool The tool being called
      * @param ToolCall $toolCall The tool call details
@@ -123,7 +123,7 @@ class TraceAgentObserver extends AgentObserver
     public function onToolCall(AgentInterface $agent, Tool $tool, ToolCall $toolCall, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace || !$this->currentAgentSpan) {
+        if (! $trace || ! $this->currentAgentSpan) {
             return;
         }
 
@@ -133,7 +133,7 @@ class TraceAgentObserver extends AgentObserver
 
     /**
      * Complete the tool call span and record results
-     * 
+     *
      * @param AgentInterface $agent The agent that initiated the tool call
      * @param Tool $tool The tool that was called
      * @param ToolCall $toolCall The tool call details
@@ -146,12 +146,12 @@ class TraceAgentObserver extends AgentObserver
     {
         // Stop the current span (should be the tool span started in onToolCall)
         $span = $this->processor->stopCurrent();
-        
+
         // Add the tool output to the span data
         $span->spanData['output'] = $toolOutput;
 
         // Mark the span as an error if the tool call failed
-        if (!$success) {
+        if (! $success) {
             $span->withError($toolOutput);
         }
     }

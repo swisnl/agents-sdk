@@ -6,9 +6,9 @@ use OpenAI\Client as OpenAIClient;
 use OpenAI\Factory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
-use Swis\Http\Fixture\Client;
 use Swis\Agents\Orchestrator;
 use Swis\Agents\Tests\Fixtures\ResponseBuilder;
+use Swis\Http\Fixture\Client;
 
 abstract class BaseOrchestratorTestCase extends TestCase
 {
@@ -25,7 +25,7 @@ abstract class BaseOrchestratorTestCase extends TestCase
         $this->client = (new Factory())
             ->withHttpClient($httpClient)
             ->withApiKey('test-api-key')
-            ->withStreamHandler(fn(RequestInterface $request) => $httpClient->sendRequest($request))
+            ->withStreamHandler(fn (RequestInterface $request) => $httpClient->sendRequest($request))
             ->make();
 
         $this->orchestrator = (new Orchestrator('Workflow'))

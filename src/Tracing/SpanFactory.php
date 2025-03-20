@@ -10,7 +10,7 @@ use Swis\Agents\Tool;
 
 /**
  * Factory for creating different types of spans to track agent operations.
- * 
+ *
  * This class provides specialized methods for creating spans that represent
  * different operations in the agent workflow, such as agent initialization,
  * tool calls, message generation, and agent handoffs.
@@ -20,26 +20,26 @@ class SpanFactory
     /**
      * Span type for agent lifecycle events
      */
-    const SPAN_TYPE_AGENT = 'agent';
-    
+    public const SPAN_TYPE_AGENT = 'agent';
+
     /**
      * Span type for tool/function calls
      */
-    const SPAN_TYPE_TOOL = 'function';
-    
+    public const SPAN_TYPE_TOOL = 'function';
+
     /**
      * Span type for LLM response generation
      */
-    const SPAN_TYPE_GENERATION = 'generation';
-    
+    public const SPAN_TYPE_GENERATION = 'generation';
+
     /**
      * Span type for agent handoff events
      */
-    const SPAN_TYPE_HANDOFF = 'handoff';
+    public const SPAN_TYPE_HANDOFF = 'handoff';
 
     /**
      * Create a span that represents an agent's execution lifecycle.
-     * 
+     *
      * This span captures agent metadata like available tools and handoffs.
      *
      * @param Agent $agent The agent being traced
@@ -63,7 +63,7 @@ class SpanFactory
 
     /**
      * Create a span for a tool call operation.
-     * 
+     *
      * This span captures the input parameters and output results of a tool invocation.
      *
      * @param Tool $tool The tool being called
@@ -89,7 +89,7 @@ class SpanFactory
 
     /**
      * Create a span for an LLM message generation operation.
-     * 
+     *
      * This span captures the prompts, responses, model information, and usage statistics
      * for a language model generation event.
      *
@@ -115,14 +115,14 @@ class SpanFactory
                 'model_config' => [
                     'temperature' => $lastMessage->owner()?->modelSettings()->temperature ?? .7,
                 ],
-                'usage' => array_map(fn($usage) => $usage ?? 0, $lastMessage->usage()),
+                'usage' => array_map(fn ($usage) => $usage ?? 0, $lastMessage->usage()),
             ],
         );
     }
 
     /**
      * Create a span for an agent handoff event.
-     * 
+     *
      * This span captures when control of a conversation is transferred
      * from one agent to another.
      *

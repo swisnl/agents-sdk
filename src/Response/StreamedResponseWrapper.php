@@ -20,8 +20,7 @@ class StreamedResponseWrapper implements IteratorAggregate
     public function __construct(
         protected StreamResponse $response,
         protected AgentInterface $agent
-    )
-    {
+    ) {
     }
 
     protected function isApplicableResponse($response): bool
@@ -31,7 +30,7 @@ class StreamedResponseWrapper implements IteratorAggregate
 
     protected function isToolCall($response): bool
     {
-        return !empty($response->choices[0]?->delta?->toolCalls ?? []) && isset($response->choices[0]?->delta?->toolCalls[0]?->function);
+        return ! empty($response->choices[0]?->delta?->toolCalls ?? []) && isset($response->choices[0]?->delta?->toolCalls[0]?->function);
     }
 
     protected function captureToolCallStream($response): void
@@ -53,7 +52,7 @@ class StreamedResponseWrapper implements IteratorAggregate
     protected function shouldHandleToolCall($response): bool
     {
         return $response->choices[0]?->finishReason === 'tool_calls'
-            || $response->choices[0]?->finishReason === 'stop' && !empty($this->capturedToolCalls);
+            || $response->choices[0]?->finishReason === 'stop' && ! empty($this->capturedToolCalls);
     }
 
     protected function handleToolCall(): void
@@ -70,8 +69,7 @@ class StreamedResponseWrapper implements IteratorAggregate
                     id: $toolCallId,
                     argumentsPayload: $toolCallData['arguments'],
                 );
-            }
-            catch (Throwable $e) {
+            } catch (Throwable $e) {
                 throw UnparsableToolCallException::forToolCallId($toolCallId, $e->getMessage());
             }
 
@@ -98,24 +96,26 @@ class StreamedResponseWrapper implements IteratorAggregate
     public function getIterator(): Generator
     {
         $generated = $this->generated;
-        if (!$this->isFinished) {
+        if (! $this->isFinished) {
             $generated = $this->response->getIterator();
         }
 
         foreach ($generated as $response) {
             $this->generated[] = $response;
 
-            if (!$this->isApplicableResponse($response)) {
+            if (! $this->isApplicableResponse($response)) {
                 continue;
             }
 
             if ($this->isToolCall($response)) {
                 $this->captureToolCallStream($response);
+
                 continue;
             }
 
             if ($this->shouldHandleToolCall($response)) {
                 $this->handleToolCall();
+
                 break;
             }
 

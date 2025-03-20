@@ -6,7 +6,7 @@ use Swis\Agents\Message;
 
 /**
  * Represents a request from the LLM to call a specific tool.
- * 
+ *
  * This class captures a tool invocation request with its name, ID, and arguments.
  * It extends the base Message class to represent tool calls in the conversation context.
  */
@@ -19,7 +19,7 @@ class ToolCall extends Message
 
     /**
      * Create a new tool call message.
-     * 
+     *
      * @param string $tool             The name of the tool to call
      * @param string $id               Unique identifier for this tool call
      * @param string|null $argumentsPayload JSON string containing the arguments for the tool

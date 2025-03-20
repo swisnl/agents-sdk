@@ -2,25 +2,25 @@
 
 namespace Swis\Agents\Orchestrator;
 
+use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Response\Payload;
 use Swis\Agents\Response\ToolCall;
 use Swis\Agents\Tool;
-use Swis\Agents\Interfaces\AgentInterface;
 
 /**
  * ObserverInvoker class for managing observer notifications.
- * 
+ *
  * This class is responsible for:
  * - Broadcasting events to registered agent observers
  * - Broadcasting events to registered tool observers
  * - Centralizing the notification logic
  */
-class ObserverInvoker {
-
+class ObserverInvoker
+{
     /**
      * Notify all agent observers about a response
-     * 
+     *
      * @param RunContext $context The run context
      * @param AgentInterface $agent The agent that generated the response
      * @param MessageInterface $message The message that was generated
@@ -35,7 +35,7 @@ class ObserverInvoker {
 
     /**
      * Notify all agent observers about an intermediate response token during streaming
-     * 
+     *
      * @param RunContext $context The run context
      * @param AgentInterface $agent The agent that generated the response
      * @param Payload $payload The response token payload
@@ -50,7 +50,7 @@ class ObserverInvoker {
 
     /**
      * Notify all agent observers about a tool call
-     * 
+     *
      * @param RunContext $context The run context
      * @param AgentInterface $agent The agent that called the tool
      * @param Tool $tool The tool that was called
@@ -66,7 +66,7 @@ class ObserverInvoker {
 
     /**
      * Notify all agent observers after a tool call completes
-     * 
+     *
      * @param RunContext $context The run context
      * @param AgentInterface $agent The agent that called the tool
      * @param Tool $tool The tool that was called
@@ -75,7 +75,8 @@ class ObserverInvoker {
      * @param bool $success Whether the tool call was successful
      * @return void
      */
-    public function agentAfterToolCall(RunContext $context, AgentInterface $agent, Tool $tool, ToolCall $toolCall, ?string $toolOutput, bool $success): void {
+    public function agentAfterToolCall(RunContext $context, AgentInterface $agent, Tool $tool, ToolCall $toolCall, ?string $toolOutput, bool $success): void
+    {
         foreach ($context->agentObservers() as $observer) {
             $observer->afterToolCall($agent, $tool, $toolCall, $toolOutput, $success, $context);
         }
@@ -83,7 +84,7 @@ class ObserverInvoker {
 
     /**
      * Notify all agent observers before an agent is invoked
-     * 
+     *
      * @param RunContext $context The run context
      * @param AgentInterface $agent The agent that will be invoked
      * @return void
@@ -97,15 +98,15 @@ class ObserverInvoker {
 
     /**
      * Notify all agent observers before a handoff to another agent
-     * 
+     *
      * @param RunContext $context The run context
      * @param AgentInterface $agent The agent handing off
      * @param AgentInterface $handoffToAgent The agent receiving the handoff
      * @return void
      */
     public function agentBeforeHandoff(
-        RunContext $context, 
-        AgentInterface $agent, 
+        RunContext $context,
+        AgentInterface $agent,
         AgentInterface $handoffToAgent
     ): void {
         foreach ($context->agentObservers() as $observer) {
@@ -115,7 +116,7 @@ class ObserverInvoker {
 
     /**
      * Notify all tool observers about a tool call
-     * 
+     *
      * @param RunContext $context The run context
      * @param Tool $tool The tool that was called
      * @param ToolCall $toolCall The tool call details

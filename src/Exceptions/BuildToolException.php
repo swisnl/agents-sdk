@@ -22,5 +22,4 @@ class BuildToolException extends ModelBehaviorException
     {
         return new ToolOutput($this->toPayload(), $this->toolCall->id);
     }
-
 }

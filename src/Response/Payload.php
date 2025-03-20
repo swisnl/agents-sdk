@@ -10,8 +10,7 @@ class Payload
         public int $choice = 0,
         public ?int $inputTokens = null,
         public ?int $outputTokens = null,
-    )
-    {
+    ) {
     }
 
     public function __toString(): string
@@ -19,4 +18,3 @@ class Payload
         return $this->content ?? '';
     }
 }
-

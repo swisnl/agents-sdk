@@ -15,5 +15,4 @@ class ResponseBuilder extends BaseResponseBuilder
 
         return parent::getQueryFromRequest($request, $replacement) . $this->i;
     }
-
 }

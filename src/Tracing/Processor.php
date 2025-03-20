@@ -8,7 +8,7 @@ use Swis\Agents\Orchestrator\RunContext;
 
 /**
  * Central processor for managing traces and spans in the agent system.
- * 
+ *
  * The Processor manages the lifecycle of traces and spans, maintaining the
  * current active span, the hierarchical relationship between spans, and
  * exporting trace data to a configured exporter when execution completes.
@@ -22,16 +22,16 @@ class Processor implements TracingProcessorInterface
 
     /**
      * Collection of all spans in the current trace
-     * 
+     *
      * @var array<Span>
      */
     protected array $spans = [];
-    
+
     /**
      * The currently active span
      */
     protected ?Span $currentSpan = null;
-    
+
     /**
      * Timestamp of the previous span's end time, used for sequential span timing
      */
@@ -39,7 +39,7 @@ class Processor implements TracingProcessorInterface
 
     /**
      * Create a new trace processor.
-     * 
+     *
      * Sets up automatic exporting of trace data when the program shuts down.
      *
      * @param TracingExporterInterface $exporter The exporter to send trace data to
@@ -47,12 +47,12 @@ class Processor implements TracingProcessorInterface
      */
     public function __construct(protected TracingExporterInterface $exporter, protected RunContext $context)
     {
-        register_shutdown_function(fn() => $this->exporter->export([$this->trace, ...$this->spans]));
+        register_shutdown_function(fn () => $this->exporter->export([$this->trace, ...$this->spans]));
     }
 
     /**
      * Start a new trace for a workflow.
-     * 
+     *
      * Creates a new trace and registers a TraceAgentObserver to capture
      * agent lifecycle events.
      *
@@ -110,7 +110,7 @@ class Processor implements TracingProcessorInterface
 
     /**
      * Start a new span that begins exactly when the previous span ended.
-     * 
+     *
      * This creates a continuous timeline without gaps between operations.
      *
      * @param Span $span The span to start
@@ -148,7 +148,7 @@ class Processor implements TracingProcessorInterface
      */
     public function stopCurrent(): ?Span
     {
-        if (!$this->currentSpan) {
+        if (! $this->currentSpan) {
             return null;
         }
 

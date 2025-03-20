@@ -32,15 +32,15 @@ class AgentTest extends TestCase
     {
         $context = new Orchestrator\RunContext();
         $orchestrator = new Orchestrator(context: $context);
-        
+
         $agent = new Agent(
-            name: fn() => 'Dynamic Agent',
-            description: fn() => 'Dynamic description',
-            instruction: fn() => 'Dynamic instruction'
+            name: fn () => 'Dynamic Agent',
+            description: fn () => 'Dynamic description',
+            instruction: fn () => 'Dynamic instruction'
         );
-        
+
         $agent->setOrchestrator($orchestrator);
-        
+
         $this->assertEquals('Dynamic Agent', $agent->name());
         $this->assertEquals('Dynamic description', $agent->description());
         $this->assertEquals('Dynamic instruction', $agent->instruction());
@@ -53,12 +53,12 @@ class AgentTest extends TestCase
     {
         $mockTool = $this->createMock(Tool::class);
         $mockTool->method('name')->willReturn('mock_tool');
-        
+
         $agent = new Agent(
             name: 'TestAgent',
             tools: [$mockTool]
         );
-        
+
         $this->assertCount(1, $agent->tools());
         $this->assertArrayHasKey('mock_tool', $agent->tools());
     }
@@ -69,12 +69,12 @@ class AgentTest extends TestCase
     public function testAgentWithHandoffs(): void
     {
         $handoffAgent = new Agent(name: 'HandoffAgent');
-        
+
         $agent = new Agent(
             name: 'TestAgent',
             handoffs: [$handoffAgent]
         );
-        
+
         $this->assertCount(1, $agent->handoffs());
         $this->assertArrayHasKey('HandoffAgent', $agent->handoffs());
     }
@@ -85,15 +85,15 @@ class AgentTest extends TestCase
     public function testAddToolsAndHandoffsAfterCreation(): void
     {
         $agent = new Agent(name: 'TestAgent');
-        
+
         $mockTool = $this->createMock(Tool::class);
         $mockTool->method('name')->willReturn('mock_tool');
-        
+
         $handoffAgent = new Agent(name: 'HandoffAgent');
-        
+
         $agent->withTool($mockTool);
         $agent->withHandoff($handoffAgent);
-        
+
         $this->assertCount(1, $agent->tools());
         $this->assertCount(1, $agent->handoffs());
     }
@@ -104,10 +104,10 @@ class AgentTest extends TestCase
     public function testCustomHandoffInstruction(): void
     {
         $agent = new Agent(name: 'TestAgent');
-        
+
         $customInstruction = 'Custom handoff instruction';
         $agent->withHandoffInstruction($customInstruction);
-        
+
         $this->assertEquals($customInstruction, $agent->handoffInstruction());
     }
 }

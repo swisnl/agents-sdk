@@ -4,12 +4,12 @@ namespace Swis\Agents\Orchestrator;
 
 use Closure;
 use Swis\Agents\AgentObserver;
-use Swis\Agents\Response\Payload;
 use Swis\Agents\Interfaces\AgentInterface;
+use Swis\Agents\Response\Payload;
 
 /**
  * StreamedAgentObserver class for handling streaming responses.
- * 
+ *
  * This class is responsible for:
  * - Receiving streaming response tokens
  */
@@ -29,6 +29,7 @@ class StreamedAgentObserver extends AgentObserver
     public function withResponseCallback(Closure $callback): self
     {
         $this->responseCallback = $callback;
+
         return $this;
     }
 
@@ -42,7 +43,7 @@ class StreamedAgentObserver extends AgentObserver
      */
     public function onResponseInterval(AgentInterface $agent, Payload $payload, RunContext $context): void
     {
-        if (!isset($this->responseCallback)) {
+        if (! isset($this->responseCallback)) {
             return;
         }
 

@@ -7,7 +7,7 @@ use Swis\Agents\Interfaces\AgentInterface;
 
 /**
  * Handoff class enables transferring control between agents.
- * 
+ *
  * A Handoff wraps an agent as a Tool so that it can be invoked by another agent.
  * When called, it transfers control to the wrapped agent, allowing specialized agents
  * to handle specific types of requests in a multi-agent system.
@@ -16,7 +16,7 @@ class Handoff extends Tool
 {
     /**
      * Creates a new Handoff instance
-     * 
+     *
      * @param AgentInterface $agent The agent to hand off to
      * @param string|null $toolName Custom name for the handoff tool (defaults to transfer_to_X)
      * @param string|null $toolDescription Custom description for the handoff tool
@@ -25,14 +25,13 @@ class Handoff extends Tool
         public AgentInterface $agent,
         protected ?string $toolName = null,
         protected ?string $toolDescription = null
-    )
-    {
+    ) {
 
     }
 
     /**
      * Gets the name of this handoff tool
-     * 
+     *
      * @return string Either the custom name or a generated one based on the agent name
      */
     public function name(): string
@@ -42,7 +41,7 @@ class Handoff extends Tool
 
     /**
      * Generates a default tool name following the format "transfer_to_agent_name"
-     * 
+     *
      * @return string The generated tool name
      */
     protected function defaultToolName(): string
@@ -52,7 +51,7 @@ class Handoff extends Tool
 
     /**
      * Gets the description of this handoff tool
-     * 
+     *
      * @return string Either the custom description or a generated one
      */
     public function description(): string
@@ -62,7 +61,7 @@ class Handoff extends Tool
 
     /**
      * Generates a default tool description explaining the handoff
-     * 
+     *
      * @return string The generated tool description
      */
     protected function defaultToolDescription(): string
@@ -72,10 +71,10 @@ class Handoff extends Tool
 
     /**
      * Executes the handoff by invoking the wrapped agent
-     * 
+     *
      * This transfers control to the target agent, which will use its own
      * tools and instructions to handle the conversation from this point forward.
-     * 
+     *
      * @return string|null Always returns null as the handoff itself generates no content
      */
     public function __invoke(): ?string
@@ -84,5 +83,4 @@ class Handoff extends Tool
 
         return null;
     }
-
 }

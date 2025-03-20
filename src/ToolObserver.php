@@ -6,7 +6,7 @@ use Swis\Agents\Response\ToolCall;
 
 /**
  * Base ToolObserver class for monitoring tool execution lifecycle.
- * 
+ *
  * This abstract class defines the observer interface for tool-related events.
  * Implementations can extend this class to add behavior at various points
  * in the tool execution lifecycle, such as when tools are called or when

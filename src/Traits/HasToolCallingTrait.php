@@ -6,16 +6,16 @@ use OpenAI\Responses\Chat\CreateResponse;
 use Swis\Agents\Exceptions\BuildToolException;
 use Swis\Agents\Exceptions\HandleToolException;
 use Swis\Agents\Handoff;
+use Swis\Agents\Helpers\ToolHelper;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\ToolCall;
 use Swis\Agents\Tool;
-use Swis\Agents\Helpers\ToolHelper;
 use Swis\Agents\Tool\ToolOutput;
 use Throwable;
 
 /**
  * Provides functionality for working with tools in agents.
- * 
+ *
  * This trait handles the lifecycle of tool calls from a model response:
  * - Extracting tool calls from model responses
  * - Building tool instances with arguments
@@ -27,10 +27,10 @@ trait HasToolCallingTrait
 {
     /**
      * Execute a list of tool calls.
-     * 
+     *
      * Processes each tool call in sequence, handling special cases
      * like handoffs. After all tools are executed, reinvokes the agent.
-     * 
+     *
      * @param array<ToolCall> $toolCalls List of tool calls to execute
      */
     public function executeTools(array $toolCalls): void
@@ -55,12 +55,12 @@ trait HasToolCallingTrait
 
     /**
      * Execute a single tool.
-     * 
+     *
      * Handles the lifecycle of a tool execution including:
      * - Notifying observers before execution
      * - Adding the tool call to the context
      * - Invoking the tool
-     * 
+     *
      * @param Tool $tool The tool instance to execute
      * @param ToolCall $toolCall The original tool call request
      */
@@ -74,17 +74,17 @@ trait HasToolCallingTrait
 
         // Add the tool call to the conversation context
         $context->addMessage($toolCall);
-        
+
         // Execute the tool and handle its result
         $this->invokeTool($tool, $toolCall, $context);
     }
 
     /**
      * Execute a handoff to another agent.
-     * 
+     *
      * Transfers control from the current agent to another agent
      * through a handoff tool.
-     * 
+     *
      * @param Handoff $handoffTool The handoff tool containing the target agent
      */
     public function executeHandoff(Handoff $handoffTool): void
@@ -102,10 +102,10 @@ trait HasToolCallingTrait
 
     /**
      * Build a tool instance from a tool call.
-     * 
+     *
      * Creates a new instance of the requested tool with the
      * provided arguments set as properties.
-     * 
+     *
      * @param ToolCall $toolCall The tool call containing tool name and arguments
      * @return Tool The instantiated tool with arguments set
      * @throws BuildToolException If the tool cannot be built
@@ -125,18 +125,17 @@ trait HasToolCallingTrait
             }
 
             return $tool;
-        }
-        catch (Throwable $e) {
+        } catch (Throwable $e) {
             throw BuildToolException::forToolCall($toolCall, $e->getMessage());
         }
     }
 
     /**
      * Invoke a tool and handle its result.
-     * 
+     *
      * Executes the tool, notifies observers of success or failure,
      * and adds the tool output to the conversation context.
-     * 
+     *
      * @param Tool $tool The tool to invoke
      * @param ToolCall $toolCall The original tool call
      * @param RunContext $context The current run context
@@ -144,6 +143,7 @@ trait HasToolCallingTrait
     protected function invokeTool(Tool $tool, ToolCall $toolCall, RunContext $context): void
     {
         $success = false;
+
         try {
             // Execute the tool and get its result
             $result = $tool();
@@ -165,21 +165,21 @@ trait HasToolCallingTrait
 
     /**
      * Check if a model response contains tool calls.
-     * 
+     *
      * @param CreateResponse $response The model response to check
      * @return bool True if the response contains tool calls
      */
     protected function isToolCall(CreateResponse $response): bool
     {
-        return !empty($response->choices[0]?->message?->toolCalls);
+        return ! empty($response->choices[0]?->message?->toolCalls);
     }
 
     /**
      * Extract tool calls from a model response.
-     * 
+     *
      * Converts the raw API response format into ToolCall objects
      * that can be processed by the agent.
-     * 
+     *
      * @param CreateResponse $response The model response containing tool calls
      * @return array<ToolCall> List of extracted tool calls
      */
@@ -202,9 +202,9 @@ trait HasToolCallingTrait
 
     /**
      * Convert a list of tools to API payload format.
-     * 
+     *
      * Transforms tool objects into the structure expected by the LLM API.
-     * 
+     *
      * @param array<Tool> $tools List of tool objects to convert
      * @return array List of tool definitions in API format
      */
@@ -215,7 +215,7 @@ trait HasToolCallingTrait
 
     /**
      * Convert a single tool to API payload format.
-     * 
+     *
      * @param Tool $tool The tool to convert
      * @return array The tool definition in API format
      */

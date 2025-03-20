@@ -38,8 +38,7 @@ class ToolAgentTest extends BaseOrchestratorTestCase
 
     protected function weatherTool(): Tool
     {
-        return new class extends Tool {
-
+        return new class () extends Tool {
             #[ToolParameter('The name of the location.'), Required]
             public string $location;
 

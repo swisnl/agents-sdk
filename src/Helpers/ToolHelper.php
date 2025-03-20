@@ -8,7 +8,7 @@ use Swis\Agents\Tool;
 
 /**
  * Helper class for working with Tool objects.
- * 
+ *
  * Provides utility methods for converting Tool classes into definitions
  * that can be sent to LLM models.
  */
@@ -16,8 +16,8 @@ class ToolHelper
 {
     /**
      * Convert a Tool object into an LLM-compatible function definition.
-     * 
-     * Uses reflection to analyze the tool class and its properties to 
+     *
+     * Uses reflection to analyze the tool class and its properties to
      * generate a structured definition that includes parameters, types,
      * descriptions, and enumerations.
      *
@@ -40,7 +40,7 @@ class ToolHelper
             $toolParameter = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\ToolParameter::class);
 
             // Skip properties that don't have the ToolParameter attribute
-            if (!isset($toolParameter)) {
+            if (! isset($toolParameter)) {
                 continue;
             }
 
@@ -74,7 +74,7 @@ class ToolHelper
         }
 
         // Only add parameters section if there are properties to include
-        if (!empty($properties)) {
+        if (! empty($properties)) {
             $definition['parameters'] = [
                 'type' => 'object',
                 'properties' => $properties,
@@ -87,7 +87,7 @@ class ToolHelper
 
     /**
      * Map PHP property types to JSON Schema types.
-     * 
+     *
      * Converts PHP's native type system to the type names expected in
      * JSON Schema / OpenAI function definitions.
      *

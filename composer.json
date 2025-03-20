@@ -1,16 +1,16 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "swisnl/agents-sdk",
+    "description": "A lightweight yet powerful framework for building multi-agent workflows in PHP, inspired by the OpenAI Agents SDK.",
     "keywords": [
-        ":vendor_name",
-        ":package_slug"
+        "swisnl",
+        "agents-sdk"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/swisnl/agents-sdk",
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Joris Meijer",
+            "email": "joris@swis.nl",
             "role": "Developer"
         }
     ],
@@ -18,28 +18,29 @@
         "php": "^8.4"
     },
     "require-dev": {
-        :require_dev_testing,
-        :require_dev_codestyle,
+        "phpunit/phpunit": "^10.3.2",
+        "friendsofphp/php-cs-fixer": "^3.21.1",
         "spatie/ray": "^1.28"
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src"
+            "Swis\\Agents\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests"
+            "Swis\\Agents\\Tests\\": "tests"
         }
     },
     "scripts": {
-        :scripts_testing,
-        :scripts_codestyle
+        "test": "vendor/bin/phpunit",
+            "test-coverage": "vendor/bin/phpunit --coverage",
+        "format": "vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --allow-risky=yes"
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            :plugins_testing,
+            
             "phpstan/extension-installer": true
         }
     },

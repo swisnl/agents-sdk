@@ -1,0 +1,21 @@
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"role":"assistant"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":"It's"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":" 20"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":" degrees"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":" in"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":" Boston"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":", MA"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":" right"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":" now"},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{"content":"."},"index":0,"finish_reason":null}]}
+
+data: {"id":"chatcmpl-456","object":"chat.completion.chunk","created":1699333252,"model":"gpt-4o","choices":[{"delta":{},"index":0,"finish_reason":"stop"}]}

@@ -67,7 +67,7 @@ class RunContext
         $this->client = OpenAI::client(
             apiKey: env('OPENAI_API_KEY', ''),
             organization: env('AGENTS_SDK_DEFAULT_ORGANIZATION'),
-            project: env('AGENTS_SDK_DEFAULT_project')
+            project: env('AGENTS_SDK_DEFAULT_PROJECT')
         );
 
         $this->observerInvoker = new ObserverInvoker();

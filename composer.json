@@ -21,17 +21,20 @@
     "require": {
         "php": "^8.2",
         "ext-json": "*",
-        "openai-php/client": "^0.10.3",
+        "http-interop/http-factory-guzzle": "^0.1.0",
         "illuminate/support": "^12.1",
+        "openai-php/client": "^0.10.3",
         "ramsey/uuid": "^4.7"
     },
     "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.73",
         "guzzlehttp/guzzle": "^7.3",
-        "symfony/console": "^7.2",
         "laravel/prompts": "^0.3.5",
-        "vlucas/phpdotenv": "^5.6",
-        "phpunit/phpunit": "^12.0",
-        "swisnl/php-http-fixture-client": "^3.1"
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.0 || ^12.0",
+        "swisnl/php-http-fixture-client": "^3.1",
+        "symfony/console": "^7.2",
+        "vlucas/phpdotenv": "^5.6"
     },
     "autoload": {
         "psr-4": {
@@ -55,6 +58,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }

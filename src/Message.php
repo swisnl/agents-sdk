@@ -4,7 +4,7 @@ namespace Swis\Agents;
 
 use JsonSerializable;
 use Swis\Agents\Interfaces\AgentInterface;
-use Swis\Agents\Interfaces\MessageInterface;
+use Swis\Agents\Interfaces\OwnableMessageInterface;
 
 /**
  * Represents a message in an agent conversation.
@@ -13,7 +13,7 @@ use Swis\Agents\Interfaces\MessageInterface;
  * Messages have a role (system, user, assistant, tool), content, and optional
  * parameters. Messages can also track token usage and be associated with an owner agent.
  */
-class Message implements MessageInterface, JsonSerializable
+class Message implements OwnableMessageInterface, JsonSerializable
 {
     /**
      * Standard role constants for different message types.
@@ -72,13 +72,10 @@ class Message implements MessageInterface, JsonSerializable
      * Sets the agent that initiated this message.
      *
      * @param AgentInterface|null $owner The agent that created this message
-     * @return MessageInterface Returns $this for method chaining
      */
-    public function withOwner(?AgentInterface $owner): MessageInterface
+    public function setOwner(?AgentInterface $owner): void
     {
         $this->owner = $owner;
-
-        return $this;
     }
 
     /**
@@ -112,7 +109,7 @@ class Message implements MessageInterface, JsonSerializable
      * Formats the message in a structure suitable for LLM API requests,
      * including any additional parameters specific to the message type.
      *
-     * @return array The message in JSON-serializable format
+     * @return array<string, mixed> The message in JSON-serializable format
      */
     public function jsonSerialize(): array
     {

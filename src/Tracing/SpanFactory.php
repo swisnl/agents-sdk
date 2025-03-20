@@ -3,6 +3,7 @@
 namespace Swis\Agents\Tracing;
 
 use Swis\Agents\Agent;
+use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\ToolCall;
@@ -42,12 +43,12 @@ class SpanFactory
      *
      * This span captures agent metadata like available tools and handoffs.
      *
-     * @param Agent $agent The agent being traced
+     * @param AgentInterface $agent The agent being traced
      * @param Trace $trace The parent trace
      * @param Span|null $parent Optional parent span
      * @return Span
      */
-    public static function createAgentSpan(Agent $agent, Trace $trace, ?Span $parent = null): Span
+    public static function createAgentSpan(AgentInterface $agent, Trace $trace, ?Span $parent = null): Span
     {
         return new Span(
             traceId: $trace->id,
@@ -101,6 +102,10 @@ class SpanFactory
      */
     public static function createGenerationSpan(array $messages, RunContext $context, Trace $trace, ?Span $parent = null): Span
     {
+        if (empty($messages)) {
+            throw new \InvalidArgumentException('The messages array must not be empty.');
+        }
+
         $input = array_diff($context->conversation(), $messages);
         $lastMessage = end($messages);
 
@@ -126,13 +131,13 @@ class SpanFactory
      * This span captures when control of a conversation is transferred
      * from one agent to another.
      *
-     * @param Agent $from The agent handing off control
-     * @param Agent $to The agent receiving control
+     * @param AgentInterface $from The agent handing off control
+     * @param AgentInterface $to The agent receiving control
      * @param Trace $trace The parent trace
      * @param Span|null $parent Optional parent span
      * @return Span
      */
-    public static function createHandoffSpan(Agent $from, Agent $to, Trace $trace, ?Span $parent = null): Span
+    public static function createHandoffSpan(AgentInterface $from, AgentInterface $to, Trace $trace, ?Span $parent = null): Span
     {
         return new Span(
             traceId: $trace->id,

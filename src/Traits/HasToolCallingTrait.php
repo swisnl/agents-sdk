@@ -159,7 +159,7 @@ trait HasToolCallingTrait
         $context->observerInvoker()->agentAfterToolCall($context, $this, $tool, $toolCall, $result, $success);
 
         // Create and add tool output message to the context
-        $toolOutput = new ToolOutput($result, $toolCall->id);
+        $toolOutput = new ToolOutput((string) $result, $toolCall->id);
         $context->addMessage($toolOutput);
     }
 
@@ -171,7 +171,7 @@ trait HasToolCallingTrait
      */
     protected function isToolCall(CreateResponse $response): bool
     {
-        return ! empty($response->choices[0]?->message?->toolCalls);
+        return ! empty($response->choices[0]->message->toolCalls);
     }
 
     /**

@@ -35,7 +35,7 @@ class MessageTest extends TestCase
             content: 'Test message content'
         );
 
-        $message->withOwner($agent);
+        $message->setOwner($agent);
 
         $this->assertSame($agent, $message->owner());
     }

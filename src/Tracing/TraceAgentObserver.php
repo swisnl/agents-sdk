@@ -147,6 +147,10 @@ class TraceAgentObserver extends AgentObserver
         // Stop the current span (should be the tool span started in onToolCall)
         $span = $this->processor->stopCurrent();
 
+        if (! $span) {
+            return;
+        }
+
         // Add the tool output to the span data
         $span->spanData['output'] = $toolOutput;
 

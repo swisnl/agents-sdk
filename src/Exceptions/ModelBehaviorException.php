@@ -12,7 +12,7 @@ class ModelBehaviorException extends Exception
 
     public function toPayload(): string
     {
-        return json_encode(['error' => $this->getMessage()]);
+        return json_encode(['error' => $this->getMessage()], JSON_THROW_ON_ERROR);
     }
 
     public function toMessage(): MessageInterface

@@ -38,15 +38,30 @@ class Orchestrator
     protected ?TracingProcessorInterface $tracingProcessor = null;
 
     /**
+     * The name of the workflow for tracing purposes
+     *
+     * @var string|null
+     */
+    protected ?string $name = null;
+
+    /**
+     * The context in which the orchestration is running
+     *
+     * @var RunContext
+     */
+    public RunContext $context;
+
+    /**
      * Create a new Orchestrator instance
      *
      * @param string|null $name Optional workflow name for tracing
      * @param RunContext|null $context Optional run context (will be created if not provided)
      */
     public function __construct(
-        protected ?string $name = null,
-        public ?RunContext $context = null
+        ?string $name = null,
+        ?RunContext $context = null
     ) {
+        $this->name = $name;
         $this->context = $context ?? new RunContext();
 
         // Check environment for tracing configuration

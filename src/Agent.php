@@ -288,7 +288,8 @@ class Agent implements AgentInterface
      * Builds the LLM request payload
      *
      * @param RunContext $context The current run context
-     * @return array The complete payload for the LLM request
+     *
+     * @return array{model: string, temperature: float, max_completion_tokens: int|null, messages: array<\Swis\Agents\Interfaces\MessageInterface>, tools?: non-empty-array, stream_options?: array{include_usage: true}} The complete payload for the LLM request
      */
     protected function buildRequestPayload(RunContext $context): array
     {
@@ -303,7 +304,9 @@ class Agent implements AgentInterface
             'messages' => $context->conversation(),
         ];
 
-        $tools = $this->buildToolsPayload($this->executableTools());
+        $tools = $this->buildToolsPayload(
+            $this->executableTools()
+        );
         if (! empty($tools)) {
             $payload['tools'] = $tools;
         }
@@ -334,10 +337,10 @@ class Agent implements AgentInterface
     /**
      * Invokes the LLM (non-streamed)
      *
-     * @param RunContext|null $context The current run context
-     * @param array $payload The request payload
+     * @param RunContext $context The current run context
+     * @param array<string, mixed> $payload The request payload
      */
-    protected function invokeDirect(?RunContext $context, array $payload): void
+    protected function invokeDirect(RunContext $context, array $payload): void
     {
         $response = $context->client()
             ->chat()
@@ -378,17 +381,19 @@ class Agent implements AgentInterface
         if (! empty($message) && isset($lastPayload)) {
             $lastPayload->content = $message;
             $context->addAgentMessage($lastPayload, $this);
-            $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
+            if ($context->lastMessage() !== null) {
+                $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
+            }
         }
     }
 
     /**
      * Handles the response from the LLM
      *
-     * @param RunContext|null $context The current run context
+     * @param RunContext $context The current run context
      * @param CreateResponse $response The response from the LLM
      */
-    protected function handleResponse(?RunContext $context, CreateResponse $response): void
+    protected function handleResponse(RunContext $context, CreateResponse $response): void
     {
         if ($this->isToolCall($response)) {
             $this->handleToolCallResponse($response);
@@ -398,16 +403,18 @@ class Agent implements AgentInterface
 
         // Create a payload from the text response
         $payload = new Payload(
-            content: $response->choices[0]?->message?->content ?? null,
-            role: $response->choices[0]?->message?->role ?? null,
-            choice: $response->choices[0]?->index ?? 0,
+            content: $response->choices[0]->message->content ?? null,
+            role: $response->choices[0]->message->role ?? null,
+            choice: $response->choices[0]->index ?? 0,
             inputTokens: $response->usage->promptTokens,
             outputTokens: $response->usage->completionTokens,
         );
 
         $context->observerInvoker()->agentOnResponseInterval($context, $this, $payload);
         $context->addAgentMessage($payload, $this);
-        $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
+        if ($context->lastMessage() !== null) {
+            $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
+        }
     }
 
     /**

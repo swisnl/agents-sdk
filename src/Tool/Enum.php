@@ -14,7 +14,7 @@ use Attribute;
 class Enum
 {
     /**
-     * @param array $possibleValues List of allowed values for this parameter
+     * @param array<scalar> $possibleValues List of allowed values for this parameter
      */
     public function __construct(public array $possibleValues = [])
     {

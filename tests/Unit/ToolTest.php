@@ -14,7 +14,7 @@ class ToolTest extends TestCase
     public function testToolName(): void
     {
         $mockTool = new class () extends Tool {
-            public function __invoke(): ?string
+            public function __invoke(): string
             {
                 return 'test result';
             }
@@ -24,7 +24,7 @@ class ToolTest extends TestCase
         $this->assertEquals('', $mockTool->name());
 
         $weatherTool = new class () extends Tool {
-            public function __invoke(): ?string
+            public function __invoke(): string
             {
                 return 'weather result';
             }
@@ -46,7 +46,7 @@ class ToolTest extends TestCase
         $mockTool = new class () extends Tool {
             protected ?string $toolDescription = 'Test tool description';
 
-            public function __invoke(): ?string
+            public function __invoke(): string
             {
                 return 'test result';
             }
@@ -55,7 +55,7 @@ class ToolTest extends TestCase
         $this->assertEquals('Test tool description', $mockTool->description());
 
         $noDescriptionTool = new class () extends Tool {
-            public function __invoke(): ?string
+            public function __invoke(): string
             {
                 return 'test result';
             }
@@ -70,7 +70,7 @@ class ToolTest extends TestCase
     public function testToolInvocation(): void
     {
         $mockTool = new class () extends Tool {
-            public function __invoke(): ?string
+            public function __invoke(): string
             {
                 return 'test result';
             }
@@ -97,7 +97,7 @@ class ToolTest extends TestCase
             #[ToolParameter('Test parameter')]
             public string $param = '';
 
-            public function __invoke(): ?string
+            public function __invoke(): string
             {
                 return $this->param;
             }

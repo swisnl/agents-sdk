@@ -37,6 +37,8 @@ class ToolHelper
         $requiredProperties = [];
         foreach ($reflection->getProperties() as $property) {
             $attributes = collect($property->getAttributes());
+
+            /** @var \ReflectionAttribute<\Swis\Agents\Tool\ToolParameter>|null $toolParameter */
             $toolParameter = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\ToolParameter::class);
 
             // Skip properties that don't have the ToolParameter attribute
@@ -62,14 +64,16 @@ class ToolHelper
                 $requiredProperties[] = $property->getName();
             }
 
-            // Handle static enum values if property has Enum attribute
-            if ($enum = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\Enum::class)) {
+            /** @var \ReflectionAttribute<\Swis\Agents\Tool\Enum> $enum */
+            $enum = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\Enum::class);
+            if ($enum) {
                 $properties[$property->getName()]['enum'] = $enum->newInstance()->values;
             }
 
-            // Handle dynamic enum values if property has DerivedEnum attribute
-            if ($enum = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\DerivedEnum::class)) {
-                $properties[$property->getName()]['enum'] = $tool->{$enum->newInstance()->methodName}();
+            /** @var \ReflectionAttribute<\Swis\Agents\Tool\DerivedEnum> $derivedEnum */
+            $derivedEnum = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\DerivedEnum::class);
+            if ($derivedEnum) {
+                $properties[$property->getName()]['enum'] = $tool->{$derivedEnum->newInstance()->methodName}();
             }
         }
 
@@ -96,7 +100,7 @@ class ToolHelper
      */
     protected static function mapPropertyType(?string $type): string
     {
-        return match (ltrim($type, '?')) {
+        return match (ltrim($type ?? '', '?')) {
             'float' => 'number',
             'int' => 'integer',
             'bool' => 'boolean',

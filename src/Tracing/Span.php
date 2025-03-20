@@ -31,6 +31,8 @@ class Span implements JsonSerializable
      */
     private ?string $error = null;
 
+    public string $id;
+
     /**
      * Create a new span instance.
      *
@@ -42,10 +44,10 @@ class Span implements JsonSerializable
     public function __construct(
         public string  $traceId,
         public ?string $parentId = null,
-        public ?string $id = null,
+        ?string $id = null,
         public array   $spanData = [],
     ) {
-        $this->id = $this->id ?? sprintf('span_%s', Str::uuid());
+        $this->id = $id ?? sprintf('span_%s', Str::uuid());
     }
 
     /**

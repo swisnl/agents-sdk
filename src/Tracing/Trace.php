@@ -14,6 +14,8 @@ use JsonSerializable;
  */
 class Trace implements JsonSerializable
 {
+    public string $id;
+
     /**
      * Create a new trace instance.
      *
@@ -24,11 +26,11 @@ class Trace implements JsonSerializable
      */
     public function __construct(
         public string  $name,
-        public ?string $id = null,
+        ?string $id = null,
         public ?string $groupId = null,
         public array   $metaData = [],
     ) {
-        $this->id = $this->id ?? sprintf('trace_%s', Str::uuid());
+        $this->id = $id ?? sprintf('trace_%s', Str::uuid());
     }
 
     /**

@@ -11,7 +11,7 @@ interface MessageInterface
     public function owner(): ?AgentInterface;
 
     /**
-     * @return array<string, int>
+     * @return array<string, ?int>
      */
     public function usage(): array;
 

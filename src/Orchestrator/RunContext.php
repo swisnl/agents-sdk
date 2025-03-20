@@ -7,6 +7,7 @@ use OpenAI\Contracts\ClientContract;
 use Swis\Agents\AgentObserver;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
+use Swis\Agents\Interfaces\OwnableMessageInterface;
 use Swis\Agents\Message;
 use Swis\Agents\Response\Payload;
 use Swis\Agents\ToolObserver;
@@ -252,8 +253,8 @@ class RunContext
      */
     public function addMessage(MessageInterface $message, ?AgentInterface $owner = null): void
     {
-        if (isset($owner)) {
-            $message->withOwner($owner);
+        if (isset($owner) && $message instanceof OwnableMessageInterface) {
+            $message->setOwner($owner);
         }
 
         $this->conversation[] = $message;
@@ -296,7 +297,7 @@ class RunContext
      */
     public function lastMessage(): ?MessageInterface
     {
-        return end($this->conversation);
+        return end($this->conversation) ?: null;
     }
 
     /**

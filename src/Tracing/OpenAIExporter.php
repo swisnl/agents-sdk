@@ -86,23 +86,28 @@ class OpenAIExporter implements TracingExporterInterface
      */
     protected function buildRequest(?string $apiKey = null, ?string $organization = null, ?string $project = null): RequestInterface
     {
+        $traceEndpoint = env('OPENAI_TRACE_API_ENDPOINT');
+        if (! is_string($traceEndpoint) || empty($traceEndpoint)) {
+            $traceEndpoint = 'https://api.openai.com/v1/traces/ingest';
+        }
+
         $request = Psr17FactoryDiscovery::findRequestFactory()
-            ->createRequest('post', env('OPENAI_TRACE_API_ENDPOINT') ?: 'https://api.openai.com/v1/traces/ingest')
+            ->createRequest('post', $traceEndpoint)
             ->withHeader('OpenAI-Beta', 'traces=v1');
 
         $apiKey = $apiKey ?? env('OPENAI_API_KEY');
         $organization = $organization ?? env('AGENTS_SDK_DEFAULT_ORGANIZATION');
         $project = $project ?? env('AGENTS_SDK_DEFAULT_PROJECT');
 
-        if (! empty($apiKey)) {
+        if (is_string($apiKey)) {
             $request = $request->withHeader('Authorization', 'Bearer ' . $apiKey);
         }
 
-        if (isset($organization)) {
+        if (is_string($organization)) {
             $request = $request->withHeader('OpenAI-Organization', $organization);
         }
 
-        if (isset($project)) {
+        if (is_string($project)) {
             $request = $request->withHeader('OpenAI-Project', $project);
         }
 
@@ -122,6 +127,6 @@ class OpenAIExporter implements TracingExporterInterface
     {
         return Psr17FactoryDiscovery::findStreamFactory()->createStream(json_encode([
             'data' => array_values($items),
-        ]));
+        ], JSON_THROW_ON_ERROR));
     }
 }

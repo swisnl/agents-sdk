@@ -28,11 +28,11 @@ composer require swisnl/agents-sdk
 Here's a simple example of creating and running an Agent that can use a Tool for retrieving weather information:
 
 ```php
-use Swisnl\Agents\Agent;
-use Swisnl\Agents\Orchestrator;
-use Swisnl\Agents\Tool;
-use Swisnl\Agents\Tool\Required;
-use Swisnl\Agents\Tool\ToolParameter;
+use Swis\Agents\Agent;
+use Swis\Agents\Orchestrator;
+use Swis\Agents\Tool;
+use Swis\Agents\Tool\Required;
+use Swis\Agents\Tool\ToolParameter;
 
 // Define a custom tool
 class WeatherTool extends Tool

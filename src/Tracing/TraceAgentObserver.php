@@ -47,7 +47,7 @@ class TraceAgentObserver extends AgentObserver
     public function beforeInvoke(AgentInterface $agent, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace) {
+        if (! $trace) {
             return;
         }
 
@@ -78,7 +78,7 @@ class TraceAgentObserver extends AgentObserver
     public function onResponse(AgentInterface $agent, MessageInterface $message, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace || !$this->currentAgentSpan) {
+        if (! $trace || ! $this->currentAgentSpan) {
             return;
         }
 
@@ -100,7 +100,7 @@ class TraceAgentObserver extends AgentObserver
     public function beforeHandoff(AgentInterface $agent, AgentInterface $handoffToAgent, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace || !$this->currentAgentSpan) {
+        if (! $trace || ! $this->currentAgentSpan) {
             return;
         }
 
@@ -123,7 +123,7 @@ class TraceAgentObserver extends AgentObserver
     public function onToolCall(AgentInterface $agent, Tool $tool, ToolCall $toolCall, RunContext $context): void
     {
         $trace = $this->processor->trace();
-        if (!$trace || !$this->currentAgentSpan) {
+        if (! $trace || ! $this->currentAgentSpan) {
             return;
         }
 
@@ -147,7 +147,7 @@ class TraceAgentObserver extends AgentObserver
         // Stop the current span (should be the tool span started in onToolCall)
         $span = $this->processor->stopCurrent();
 
-        if (!$span) {
+        if (! $span) {
             return;
         }
 
@@ -155,7 +155,7 @@ class TraceAgentObserver extends AgentObserver
         $span->spanData['output'] = $toolOutput;
 
         // Mark the span as an error if the tool call failed
-        if (!$success) {
+        if (! $success) {
             $span->withError($toolOutput);
         }
     }

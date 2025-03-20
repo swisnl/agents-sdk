@@ -105,14 +105,14 @@ class StreamedResponseWrapper implements IteratorAggregate
     public function getIterator(): Generator
     {
         $generated = $this->generated;
-        if (!$this->isFinished) {
+        if (! $this->isFinished) {
             $generated = $this->response->getIterator();
         }
 
         foreach ($generated as $response) {
             $this->generated[] = $response;
 
-            if (!$this->isApplicableResponse($response)) {
+            if (! $this->isApplicableResponse($response)) {
                 continue;
             }
 

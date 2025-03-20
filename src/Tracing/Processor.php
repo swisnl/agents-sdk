@@ -148,7 +148,7 @@ class Processor implements TracingProcessorInterface
      */
     public function stopCurrent(): ?Span
     {
-        if (!$this->currentSpan) {
+        if (! $this->currentSpan) {
             return null;
         }
 

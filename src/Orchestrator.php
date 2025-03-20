@@ -234,7 +234,7 @@ class Orchestrator
      */
     protected function prepareTrace(): void
     {
-        if (!$this->tracingEnabled || $this->tracingProcessor?->isStarted()) {
+        if (! $this->tracingEnabled || $this->tracingProcessor?->isStarted()) {
             return;
         }
 

@@ -21,8 +21,9 @@
     "require": {
         "php": "^8.2",
         "ext-json": "*",
-        "openai-php/client": "^0.10.3",
+        "http-interop/http-factory-guzzle": "^0.1.0",
         "illuminate/support": "^12.1",
+        "openai-php/client": "^0.10.3",
         "ramsey/uuid": "^4.7"
     },
     "require-dev": {
@@ -56,6 +57,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "beta",
     "prefer-stable": true
 }

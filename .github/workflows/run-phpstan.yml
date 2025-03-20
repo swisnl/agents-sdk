@@ -1,4 +1,4 @@
-name: Tests
+name: PHPStan
 
 on:
   push:
@@ -18,9 +18,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         php: [8.2, 8.4]
-        stability: [prefer-lowest, prefer-stable]
 
-    name: P${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
+    name: P${{ matrix.php }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -34,7 +33,7 @@ jobs:
           coverage: xdebug
 
       - name: Install dependencies
-        run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+        run: composer update --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
         run: composer show -D

@@ -2,8 +2,12 @@
 
 A lightweight yet powerful framework for building multi-agent workflows in PHP, inspired by the OpenAI Agents SDK.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.2-8892BF.svg)](https://www.php.net/)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/swisnl/agents-sdk.svg)](https://packagist.org/packages/swisnl/agents-sdk)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/swisnl/agents-sdk.svg)](https://packagist.org/packages/swisnl/agents-sdk)
+[![Software License](https://img.shields.io/packagist/l/swisnl/agents-sdk.svg)](LICENSE.md)
+[![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen.svg)](https://plant.treeware.earth/swisnl/agents-sdk)
+[![Build Status](https://img.shields.io/github/checks-status/swisnl/agents-sdk/master?label=tests)](https://github.com/swisnl/agents-sdk/actions/workflows/tests.yml)
+[![Made by SWIS](https://img.shields.io/badge/%F0%9F%9A%80-made%20by%20SWIS-%230737A9.svg)](https://www.swis.nl)
 
 ## Overview
 

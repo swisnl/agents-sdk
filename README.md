@@ -249,7 +249,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [Joris Meijer](https://github.com/jmeijer)
+- [Joris Meijer](https://github.com/jormeijer)
 - [Björn Brala](https://github.com/bbrala)
 - [All Contributors](../../contributors)
 

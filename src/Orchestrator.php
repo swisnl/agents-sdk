@@ -4,6 +4,7 @@ namespace Swis\Agents;
 
 use Closure;
 use OpenAI\Contracts\ClientContract;
+use Swis\Agents\Helpers\ConversationSerializer;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Interfaces\TracingProcessorInterface;
@@ -68,6 +69,19 @@ class Orchestrator
         if (env('AGENTS_SDK_DISABLE_TRACING', false)) {
             $this->disableTracing();
         }
+    }
+
+    /**
+     * Deserialize conversation data into a new RunContext
+     *
+     * @param array $data The serialized conversation data
+     * @return self
+     */
+    public function withContextFromData(array $data): self
+    {
+        ConversationSerializer::deserialize($data, $this->context);
+
+        return $this;
     }
 
     /**

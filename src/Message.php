@@ -33,7 +33,7 @@ class Message implements OwnableMessageInterface, JsonSerializable
      *
      * @param string $role           The message role (system, user, assistant, tool)
      * @param string|null $content   The message content text
-     * @param array $parameters      Additional parameters specific to message type
+     * @param array<string, mixed> $parameters      Additional parameters specific to message type
      * @param int|null $inputTokens  Number of tokens in input processing, for usage tracking
      * @param int|null $outputTokens Number of tokens in output generation, for usage tracking
      */
@@ -64,6 +64,16 @@ class Message implements OwnableMessageInterface, JsonSerializable
     public function content(): ?string
     {
         return $this->content;
+    }
+
+    /**
+     * Get the parameters of the message.
+     *
+     * @return array<string, mixed> The message parameters
+     */
+    public function parameters(): array
+    {
+        return $this->parameters;
     }
 
     /**

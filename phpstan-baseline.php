@@ -26,6 +26,24 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Agent.php',
 ];
 $ignoreErrors[] = [
+	'message' => '#^Method Swis\\\\Agents\\\\Helpers\\\\ConversationSerializer\\:\\:deserialize\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
+	'identifier' => 'missingType.iterableValue',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ConversationSerializer.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Method Swis\\\\Agents\\\\Helpers\\\\ConversationSerializer\\:\\:serialize\\(\\) return type has no value type specified in iterable type array\\.$#',
+	'identifier' => 'missingType.iterableValue',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ConversationSerializer.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Method Swis\\\\Agents\\\\Helpers\\\\ConversationSerializer\\:\\:serializeFromOrchestrator\\(\\) return type has no value type specified in iterable type array\\.$#',
+	'identifier' => 'missingType.iterableValue',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ConversationSerializer.php',
+];
+$ignoreErrors[] = [
 	'message' => '#^Access to an undefined property Swis\\\\Agents\\\\Tool\\\\Enum\\:\\:\\$values\\.$#',
 	'identifier' => 'property.notFound',
 	'count' => 1,
@@ -50,16 +68,16 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Interfaces/TracingProcessorInterface.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Method Swis\\\\Agents\\\\Message\\:\\:__construct\\(\\) has parameter \\$parameters with no value type specified in iterable type array\\.$#',
-	'identifier' => 'missingType.iterableValue',
-	'count' => 1,
-	'path' => __DIR__ . '/src/Message.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Property Swis\\\\Agents\\\\Model\\\\ModelSettings\\:\\:\\$modelName \\(string\\) does not accept mixed\\.$#',
 	'identifier' => 'assign.propertyType',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Model/ModelSettings.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Method Swis\\\\Agents\\\\Orchestrator\\:\\:withContextFromData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
+	'identifier' => 'missingType.iterableValue',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Orchestrator.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^Parameter \\$apiKey of static method OpenAI\\:\\:client\\(\\) expects string, mixed given\\.$#',

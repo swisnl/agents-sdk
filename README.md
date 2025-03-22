@@ -216,6 +216,31 @@ Run the examples using:
 php examples/play.php
 ```
 
+## Conversation Serialization
+
+The SDK provides a way to serialize and deserialize conversation state, allowing you to continue conversations at a later time:
+
+```php
+use Swis\Agents\Helpers\ConversationSerializer;
+
+// After running some conversation with an orchestrator
+$data = ConversationSerializer::serializeFromOrchestrator($orchestrator);
+saveToStorage($data); // Your storage implementation
+
+// Later, when you want to continue the conversation
+$data = retrieveFromStorage(); // Your retrieval implementation
+
+// Create a new orchestrator with the serialized conversation
+$orchestrator = new Orchestrator();
+$orchestrator->withContextFromData($data);
+
+$agent = new Agent(/* Create your agent */);
+
+// Continue the conversation
+$orchestrator->withUserInstruction('New message');
+$response = $orchestrator->run($agent);
+```
+
 ## Requirements
 
 - PHP 8.2 or higher

@@ -8,6 +8,11 @@ interface MessageInterface
 
     public function content(): ?string;
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function parameters(): array;
+
     public function owner(): ?AgentInterface;
 
     /**

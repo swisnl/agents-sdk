@@ -10,12 +10,6 @@ All notable changes to `agents-sdk` will be documented in this file.
 
 **Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.1.1...0.2.0
 
-## Unreleased
-
-### Added
-
-* Added `ConversationSerializer` class for serializing and deserializing conversation state
-
 ## 0.1.1 - 2025-03-22
 
 ### What's Changed

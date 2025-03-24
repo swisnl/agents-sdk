@@ -56,7 +56,7 @@ class ConversationSerializer
      * @param RunContext|null $into An existing context to add the conversation to
      * @return RunContext A new context with the conversation history
      */
-    public static function deserialize(array $data, ?RunContext $into): RunContext
+    public static function deserialize(array $data, ?RunContext $into = null): RunContext
     {
         $context = $into ?? new RunContext();
 

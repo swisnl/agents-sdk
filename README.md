@@ -281,3 +281,9 @@ Please review [our security policy](../../security/policy) on how to report secu
 ## License
 
 This package is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+This package is [Treeware](https://treeware.earth). If you use it in production, then we ask that you [**buy the world a tree**](https://plant.treeware.earth/swisnl/agents-sdk) to thank us for our work. By contributing to the Treeware forest you’ll be creating employment for local families and restoring wildlife habitats.
+
+## SWIS :heart: Open Source
+
+[SWIS](https://www.swis.nl) is a web agency from Leiden, the Netherlands. We love working with open source software.

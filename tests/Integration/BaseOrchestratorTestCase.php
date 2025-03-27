@@ -19,7 +19,8 @@ abstract class BaseOrchestratorTestCase extends TestCase
     {
         parent::setUp();
 
-        $responseBuilder = new ResponseBuilder(__DIR__ . '/../Fixtures/'.class_basename($this));
+        $className = (new \ReflectionClass($this))->getShortName();
+        $responseBuilder = new ResponseBuilder(__DIR__ . '/../Fixtures/'.$className);
         $httpClient = new Client($responseBuilder);
 
         $this->client = (new Factory())

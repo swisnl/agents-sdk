@@ -7,6 +7,7 @@ use Http\Discovery\Psr18ClientDiscovery;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\StreamInterface;
+use Swis\Agents\Helpers\EnvHelper;
 use Swis\Agents\Interfaces\TracingExporterInterface;
 
 /**
@@ -86,7 +87,7 @@ class OpenAIExporter implements TracingExporterInterface
      */
     protected function buildRequest(?string $apiKey = null, ?string $organization = null, ?string $project = null): RequestInterface
     {
-        $traceEndpoint = env('OPENAI_TRACE_API_ENDPOINT');
+        $traceEndpoint = EnvHelper::get('OPENAI_TRACE_API_ENDPOINT');
         if (! is_string($traceEndpoint) || empty($traceEndpoint)) {
             $traceEndpoint = 'https://api.openai.com/v1/traces/ingest';
         }
@@ -95,9 +96,9 @@ class OpenAIExporter implements TracingExporterInterface
             ->createRequest('post', $traceEndpoint)
             ->withHeader('OpenAI-Beta', 'traces=v1');
 
-        $apiKey = $apiKey ?? env('OPENAI_API_KEY');
-        $organization = $organization ?? env('AGENTS_SDK_DEFAULT_ORGANIZATION');
-        $project = $project ?? env('AGENTS_SDK_DEFAULT_PROJECT');
+        $apiKey = $apiKey ?? EnvHelper::get('OPENAI_API_KEY');
+        $organization = $organization ?? EnvHelper::get('AGENTS_SDK_DEFAULT_ORGANIZATION');
+        $project = $project ?? EnvHelper::get('AGENTS_SDK_DEFAULT_PROJECT');
 
         if (is_string($apiKey)) {
             $request = $request->withHeader('Authorization', 'Bearer ' . $apiKey);

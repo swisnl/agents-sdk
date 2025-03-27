@@ -21,7 +21,6 @@
     "require": {
         "php": "^8.2",
         "ext-json": "*",
-        "illuminate/support": "^12.1",
         "openai-php/client": "^0.10.3",
         "ramsey/uuid": "^4.7"
     },

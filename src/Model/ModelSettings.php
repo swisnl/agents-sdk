@@ -2,6 +2,8 @@
 
 namespace Swis\Agents\Model;
 
+use Swis\Agents\Helpers\EnvHelper;
+
 class ModelSettings
 {
     public function __construct(
@@ -10,7 +12,7 @@ class ModelSettings
         public ?int $maxTokens = null,
     ) {
         if (empty($this->modelName)) {
-            $this->modelName = env('AGENTS_SDK_DEFAULT_MODEL') ?: 'gpt-4o';
+            $this->modelName = EnvHelper::get('AGENTS_SDK_DEFAULT_MODEL') ?: 'gpt-4o';
         }
     }
 }

@@ -3,8 +3,8 @@
 namespace Swis\Agents\Tracing;
 
 use DateTime;
-use Illuminate\Support\Str;
 use JsonSerializable;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Represents a single unit of work within a trace.
@@ -47,7 +47,7 @@ class Span implements JsonSerializable
         ?string $id = null,
         public array   $spanData = [],
     ) {
-        $this->id = $id ?? sprintf('span_%s', Str::uuid());
+        $this->id = $id ?? sprintf('span_%s', Uuid::uuid4()->toString());
     }
 
     /**

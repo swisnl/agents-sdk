@@ -44,7 +44,19 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Helpers/ConversationSerializer.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Access to an undefined property Swis\\\\Agents\\\\Tool\\\\Enum\\:\\:\\$values\\.$#',
+	'message' => '#^Access to an undefined property object\\:\\:\\$description\\.$#',
+	'identifier' => 'property.notFound',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Access to an undefined property object\\:\\:\\$methodName\\.$#',
+	'identifier' => 'property.notFound',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Access to an undefined property object\\:\\:\\$values\\.$#',
 	'identifier' => 'property.notFound',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
@@ -58,6 +70,18 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'message' => '#^Method Swis\\\\Agents\\\\Helpers\\\\ToolHelper\\:\\:toolToDefinition\\(\\) return type has no value type specified in iterable type array\\.$#',
 	'identifier' => 'missingType.iterableValue',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^PHPDoc tag @var with type ReflectionAttribute\\<Swis\\\\Agents\\\\Tool\\\\DerivedEnum\\> is not subtype of native type null\\.$#',
+	'identifier' => 'varTag.nativeType',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^PHPDoc tag @var with type ReflectionAttribute\\<Swis\\\\Agents\\\\Tool\\\\Enum\\> is not subtype of native type null\\.$#',
+	'identifier' => 'varTag.nativeType',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
 ];

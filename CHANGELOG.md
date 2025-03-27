@@ -2,6 +2,15 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.2.1 - 2025-03-27
+
+### What's Changed
+
+* build: Remove unused http-factory-guzzle dependency by @jormeijer in https://github.com/swisnl/agents-sdk/pull/11
+* test: Add missing test for ConversationSerializer by @jormeijer in https://github.com/swisnl/agents-sdk/pull/12
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.2.0...0.2.1
+
 ## 0.2.0 - 2025-03-22
 
 ### What's Changed

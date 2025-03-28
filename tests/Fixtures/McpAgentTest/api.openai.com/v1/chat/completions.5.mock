@@ -1,0 +1,22 @@
+{
+  "id": "chatcmpl-8c7LMB7XbgTXUMIgDBzBkkXUIcvEn",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "The result of 5 + 7 is 12.",
+        "role": "assistant",
+        "tool_calls": null
+      }
+    }
+  ],
+  "created": 1697645119,
+  "model": "gpt-4o",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 12,
+    "prompt_tokens": 87,
+    "total_tokens": 99
+  }
+}

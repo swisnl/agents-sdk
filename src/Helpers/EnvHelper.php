@@ -16,10 +16,14 @@ class EnvHelper
      */
     public static function get(string $key, $default = null)
     {
-        $value = getenv($key);
+        $value = $_ENV[$key] ?? false;
 
         if ($value === false) {
             return $default;
+        }
+
+        if (!is_string($value)) {
+            return $value;
         }
 
         switch (strtolower($value)) {

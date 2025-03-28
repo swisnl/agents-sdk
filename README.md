@@ -18,6 +18,8 @@ Agents SDK provides an elegant abstraction for creating AI agent systems in PHP,
 - Define and use custom tools for external operations
 - Stream LLM responses for real-time interactions
 - Monitor agent behavior with observers and traces
+- Serialize and deserialize conversations for state management
+- Connect to external tools using the Model Context Protocol (MCP)
 
 The SDK is designed to be flexible, extensible, and easy to use while providing a robust foundation for building complex multi-agent based systems.
 
@@ -118,6 +120,76 @@ class SearchTool extends Tool
         ]);
     }
 }
+```
+
+## MCP Tool Support
+
+The SDK supports the Model Context Protocol (MCP) through the `McpConnection` class, allowing you to integrate external data sources and tools with your agents.
+
+### What is MCP?
+
+MCP (Model Context Protocol) is an open protocol that enables seamless integration between LLM applications and external data sources and tools. It provides a standardized way to connect LLMs with the context they need, offering:
+
+- Dynamic discovery of available tools
+- Tool filtering to restrict which tools are available to agents
+- Remote tool invocation
+
+### Using MCP
+
+It's recommended to use the `swis/mcp-client` package for MCP client implementations.
+
+```bash
+composer require swisnl/mcp-client
+```
+
+To use MCP tools with your agents:
+
+```php
+use Swis\Agents\Agent;
+use Swis\Agents\Mcp\McpConnection;
+use Swis\McpClient\Client;
+
+// Create an MCP connection
+$mcpConnection = new McpConnection(
+    client: Client::withSse('http://localhost:3000'),
+    name: 'My MCP Server'
+);
+
+// Optionally restrict which tools are available
+$mcpConnection->withTools('calculator', 'weather');
+
+// Create an agent with the MCP connection
+$agent = new Agent(
+    name: 'Assistant with MCP Tools',
+    description: 'An assistant that can use external MCP tools',
+    mcpConnections: [$mcpConnection]
+);
+```
+
+### Advanced MCP Usage
+
+The SDK supports advanced MCP features:
+
+- Tool caching with PSR-6 compatible cache adapters
+- Process-based MCP clients for local tools
+
+Example with a local MCP server:
+
+```php
+// Create a connection to a local MCP server with process management
+[$client, $process] = Client::withProcess(
+    command: 'node path/to/mcp-server.js',
+    autoRestartAmount: 5
+);
+
+$mcpConnection = new McpConnection(
+    client: $client,
+    name: 'Local Math MCP'
+);
+
+// Add caching support
+$mcpConnection->withCache($psr6CacheImplementation)
+    ->withCacheTtl(1800); // 30 minute cache
 ```
 
 ## Multi-Agent Systems

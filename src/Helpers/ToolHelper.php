@@ -2,8 +2,10 @@
 
 namespace Swis\Agents\Helpers;
 
+use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionNamedType;
+use Swis\Agents\DynamicTool;
 use Swis\Agents\Tool;
 
 /**
@@ -21,6 +23,8 @@ class ToolHelper
      * generate a structured definition that includes parameters, types,
      * descriptions, and enumerations.
      *
+     * Also includes any dynamic properties registered with the tool.
+     *
      * @param Tool $tool The tool to convert to a definition
      * @return array The function definition in LLM-compatible format
      */
@@ -31,50 +35,15 @@ class ToolHelper
             'description' => $tool->description(),
         ];
 
-        $reflection = new ReflectionClass($tool);
-
         $properties = [];
         $requiredProperties = [];
-        foreach ($reflection->getProperties() as $property) {
-            $attributes = $property->getAttributes();
 
-            /** @var \ReflectionAttribute<\Swis\Agents\Tool\ToolParameter>|null $toolParameter */
-            $toolParameter = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\ToolParameter::class);
+        // Process regular properties with attributes
+        self::processReflectionProperties($tool, $properties, $requiredProperties);
 
-            // Skip properties that don't have the ToolParameter attribute
-            if (! isset($toolParameter)) {
-                continue;
-            }
-
-            // Get the property type if available
-            $typeDefinition = null;
-            $type = $property->getType();
-            if ($type instanceof ReflectionNamedType) {
-                $typeDefinition = $type->getName();
-            }
-
-            // Build the parameter definition with type and description
-            $properties[$property->getName()] = [
-                'type' => self::mapPropertyType($typeDefinition),
-                'description' => $toolParameter->newInstance()->description,
-            ];
-
-            // Add to required properties list if it has the Required attribute
-            if (ArrayHelper::contains($attributes, fn ($attribute) => $attribute->getName() === Tool\Required::class)) {
-                $requiredProperties[] = $property->getName();
-            }
-
-            /** @var \ReflectionAttribute<\Swis\Agents\Tool\Enum> $enum */
-            $enum = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\Enum::class);
-            if ($enum) {
-                $properties[$property->getName()]['enum'] = $enum->newInstance()->values;
-            }
-
-            /** @var \ReflectionAttribute<\Swis\Agents\Tool\DerivedEnum> $derivedEnum */
-            $derivedEnum = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\DerivedEnum::class);
-            if ($derivedEnum) {
-                $properties[$property->getName()]['enum'] = $tool->{$derivedEnum->newInstance()->methodName}();
-            }
+        if ($tool instanceof DynamicTool) {
+            // Process dynamic properties
+            self::processDynamicProperties($tool, $properties, $requiredProperties);
         }
 
         // Only add parameters section if there are properties to include
@@ -87,6 +56,107 @@ class ToolHelper
         }
 
         return $definition;
+    }
+
+    /**
+     * Process reflection properties from the tool class
+     *
+     * @param Tool $tool The tool being processed
+     * @param array<array<string, mixed>> &$properties Properties accumulator
+     * @param array<string> &$requiredProperties Required properties accumulator
+     */
+    private static function processReflectionProperties(Tool $tool, array &$properties, array &$requiredProperties): void
+    {
+        $reflection = new ReflectionClass($tool);
+
+        foreach ($reflection->getProperties() as $property) {
+            $attributes = $property->getAttributes();
+            /** @var \ReflectionAttribute<\Swis\Agents\Tool\ToolParameter>|null $toolParameter */
+            $toolParameter = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\ToolParameter::class);
+
+            // Skip properties that don't have the ToolParameter attribute
+            if (! isset($toolParameter)) {
+                continue;
+            }
+
+            $propertyName = $property->getName();
+
+            // Get the property type if available
+            $typeDefinition = null;
+            $type = $property->getType();
+            if ($type instanceof ReflectionNamedType) {
+                $typeDefinition = $type->getName();
+            }
+
+            // Build the parameter definition with type and description
+            $properties[$propertyName] = [
+                'type' => self::mapPropertyType($typeDefinition),
+                'description' => $toolParameter->newInstance()->description,
+            ];
+
+            // Add to required properties list if it has the Required attribute
+            if (ArrayHelper::contains($attributes, fn ($attribute) => $attribute->getName() === Tool\Required::class)) {
+                $requiredProperties[] = $property->getName();
+            }
+
+            self::processEnumAttributes($attributes, $properties, $propertyName, $tool);
+        }
+    }
+
+    /**
+     * Process enum attributes on a property
+     *
+     * @param list<ReflectionAttribute<object>> $attributes Property attributes
+     * @param array<array<string, mixed>> &$properties Properties accumulator
+     * @param string $propertyName The property name
+     * @param Tool $tool The tool being processed
+     */
+    private static function processEnumAttributes(array $attributes, array &$properties, string $propertyName, Tool $tool): void
+    {
+        /** @var \ReflectionAttribute<\Swis\Agents\Tool\Enum> $enum */
+        $enum = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\Enum::class);
+        if ($enum) {
+            $properties[$propertyName]['enum'] = $enum->newInstance()->values;
+        }
+
+        /** @var \ReflectionAttribute<\Swis\Agents\Tool\DerivedEnum> $derivedEnum */
+        $derivedEnum = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\DerivedEnum::class);
+        if ($derivedEnum) {
+            $properties[$propertyName]['enum'] = $tool->{$derivedEnum->newInstance()->methodName}();
+        }
+    }
+
+    /**
+     * Process dynamic properties from the tool
+     *
+     * @param DynamicTool $tool The tool being processed
+     * @param array<array<string, mixed>> &$properties Properties accumulator
+     * @param array<string> &$requiredProperties Required properties accumulator
+     */
+    private static function processDynamicProperties(DynamicTool $tool, array &$properties, array &$requiredProperties): void
+    {
+        $dynamicProps = $tool->getDynamicProperties();
+        foreach ($dynamicProps as $propName => $propDetails) {
+            $properties[$propName] = [
+                'type' => $propDetails['type'],
+                'description' => $propDetails['description'],
+            ];
+
+            // Add enum values if they exist
+            if (isset($propDetails['enum'])) {
+                $properties[$propName]['enum'] = $propDetails['enum'];
+            }
+
+            // Add to required properties list if needed
+            if ($propDetails['required']) {
+                $requiredProperties[] = $propName;
+            }
+
+            // TODO: Handle array items type
+            if ($properties[$propName]['type'] === 'array') {
+                $properties[$propName]['items'] = ['type' => 'string'];
+            }
+        }
     }
 
     /**

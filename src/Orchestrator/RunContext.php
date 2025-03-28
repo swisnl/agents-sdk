@@ -5,6 +5,7 @@ namespace Swis\Agents\Orchestrator;
 use OpenAI;
 use OpenAI\Contracts\ClientContract;
 use Swis\Agents\AgentObserver;
+use Swis\Agents\Helpers\EnvHelper;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Interfaces\OwnableMessageInterface;
@@ -66,9 +67,9 @@ class RunContext
     {
         // Initialize the OpenAI client with environment variables
         $this->client = OpenAI::client(
-            apiKey: env('OPENAI_API_KEY', ''),
-            organization: env('AGENTS_SDK_DEFAULT_ORGANIZATION'),
-            project: env('AGENTS_SDK_DEFAULT_PROJECT')
+            apiKey: EnvHelper::get('OPENAI_API_KEY', ''),
+            organization: EnvHelper::get('AGENTS_SDK_DEFAULT_ORGANIZATION'),
+            project: EnvHelper::get('AGENTS_SDK_DEFAULT_PROJECT')
         );
 
         $this->observerInvoker = new ObserverInvoker();

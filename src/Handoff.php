@@ -2,7 +2,7 @@
 
 namespace Swis\Agents;
 
-use Illuminate\Support\Str;
+use Swis\Agents\Helpers\StringHelper;
 use Swis\Agents\Interfaces\AgentInterface;
 
 /**
@@ -46,7 +46,7 @@ class Handoff extends Tool
      */
     protected function defaultToolName(): string
     {
-        return sprintf('transfer_to_%s', Str::snake($this->agent->name()));
+        return sprintf('transfer_to_%s', StringHelper::toSnakeCase($this->agent->name()));
     }
 
     /**
@@ -66,7 +66,9 @@ class Handoff extends Tool
      */
     protected function defaultToolDescription(): string
     {
-        return sprintf('Handoff to the %s Agent to handle the request.', trim(Str::replaceEnd('Agent', '', $this->agent->name())));
+        $agentName = StringHelper::removeFromEnd($this->agent->name(), 'Agent');
+
+        return sprintf('Handoff to the %s Agent to handle the request.', trim($agentName));
     }
 
     /**

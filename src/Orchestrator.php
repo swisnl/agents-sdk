@@ -5,6 +5,7 @@ namespace Swis\Agents;
 use Closure;
 use OpenAI\Contracts\ClientContract;
 use Swis\Agents\Helpers\ConversationSerializer;
+use Swis\Agents\Helpers\EnvHelper;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Interfaces\TracingProcessorInterface;
@@ -66,7 +67,7 @@ class Orchestrator
         $this->context = $context ?? new RunContext();
 
         // Check environment for tracing configuration
-        if (env('AGENTS_SDK_DISABLE_TRACING', false)) {
+        if (EnvHelper::get('AGENTS_SDK_DISABLE_TRACING', false)) {
             $this->disableTracing();
         }
     }

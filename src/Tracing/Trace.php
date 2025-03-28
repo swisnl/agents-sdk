@@ -2,8 +2,8 @@
 
 namespace Swis\Agents\Tracing;
 
-use Illuminate\Support\Str;
 use JsonSerializable;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Represents a complete trace of an agent workflow execution.
@@ -30,7 +30,7 @@ class Trace implements JsonSerializable
         public ?string $groupId = null,
         public array   $metaData = [],
     ) {
-        $this->id = $id ?? sprintf('trace_%s', Str::uuid());
+        $this->id = $id ?? sprintf('trace_%s', Uuid::uuid4()->toString());
     }
 
     /**

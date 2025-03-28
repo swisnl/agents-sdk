@@ -36,10 +36,10 @@ class ToolHelper
         $properties = [];
         $requiredProperties = [];
         foreach ($reflection->getProperties() as $property) {
-            $attributes = collect($property->getAttributes());
+            $attributes = $property->getAttributes();
 
             /** @var \ReflectionAttribute<\Swis\Agents\Tool\ToolParameter>|null $toolParameter */
-            $toolParameter = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\ToolParameter::class);
+            $toolParameter = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\ToolParameter::class);
 
             // Skip properties that don't have the ToolParameter attribute
             if (! isset($toolParameter)) {
@@ -60,18 +60,18 @@ class ToolHelper
             ];
 
             // Add to required properties list if it has the Required attribute
-            if ($attributes->contains(fn ($attribute) => $attribute->getName() === Tool\Required::class)) {
+            if (ArrayHelper::contains($attributes, fn ($attribute) => $attribute->getName() === Tool\Required::class)) {
                 $requiredProperties[] = $property->getName();
             }
 
             /** @var \ReflectionAttribute<\Swis\Agents\Tool\Enum> $enum */
-            $enum = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\Enum::class);
+            $enum = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\Enum::class);
             if ($enum) {
                 $properties[$property->getName()]['enum'] = $enum->newInstance()->values;
             }
 
             /** @var \ReflectionAttribute<\Swis\Agents\Tool\DerivedEnum> $derivedEnum */
-            $derivedEnum = $attributes->first(fn ($attribute) => $attribute->getName() === Tool\DerivedEnum::class);
+            $derivedEnum = ArrayHelper::first($attributes, fn ($attribute) => $attribute->getName() === Tool\DerivedEnum::class);
             if ($derivedEnum) {
                 $properties[$property->getName()]['enum'] = $tool->{$derivedEnum->newInstance()->methodName}();
             }

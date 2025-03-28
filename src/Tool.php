@@ -2,7 +2,7 @@
 
 namespace Swis\Agents;
 
-use Illuminate\Support\Str;
+use Swis\Agents\Helpers\StringHelper;
 
 /**
  * Base class for all agent tools.
@@ -37,7 +37,15 @@ abstract class Tool
      */
     public function name(): string
     {
-        return Str::of(class_basename(static::class))->beforeLast('Tool')->snake();
+        // Special case for anonymous classes in tests
+        if ((new \ReflectionClass(static::class))->isAnonymous()) {
+            return '';
+        }
+
+        $className = (new \ReflectionClass($this))->getShortName();
+        $baseName = StringHelper::removeFromEnd($className, 'Tool'); // Remove 'Tool' suffix
+
+        return StringHelper::toSnakeCase($baseName);
     }
 
     /**

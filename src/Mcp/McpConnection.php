@@ -154,7 +154,7 @@ class McpConnection implements McpConnectionInterface
             return $this->tools ?? [];
         }
 
-        // Try to get tools from PSR-6 cache if available and not refreshing
+        // Try to get tools from persistent cache if available and not refreshing
         if (! $refresh && $this->hasPersistentCache()) {
             $cachedTools = $this->getToolsFromCache();
 
@@ -168,7 +168,7 @@ class McpConnection implements McpConnectionInterface
         // Fetch tools from MCP server
         $this->tools = $this->fetchTools();
 
-        // Store in PSR-6 cache if available
+        // Store in persistent cache if available
         if ($this->hasPersistentCache()) {
             $this->storeToolsInCache($this->tools);
         }
@@ -211,10 +211,13 @@ class McpConnection implements McpConnectionInterface
 
         if ($cacheItem->isHit()) {
             $cachedTools = $cacheItem->get();
-            if (is_array($cachedTools)) {
-                /** @var array<McpTool> $cachedTools */
-                return $cachedTools;
+
+            if (! is_array($cachedTools)) {
+                return null;
             }
+
+            /** @var array<McpTool> $cachedTools */
+            return $cachedTools;
         }
 
         return null;

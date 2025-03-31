@@ -28,7 +28,7 @@ class MathMcpConnection extends McpConnection
     public function __construct()
     {
         [$client, $process] = Client::withProcess(
-            command: '/opt/homebrew/bin/node ' . realpath(__DIR__ . '/../../node_modules/math-mcp/build/index.js'),
+            command: 'node ' . realpath(__DIR__ . '/../../node_modules/math-mcp/build/index.js'),
             // PHP has the habit of terminating child processes when waiting for CLI user input
             // This option will restart the child process if it terminates unexpectedly
             autoRestartAmount: 99

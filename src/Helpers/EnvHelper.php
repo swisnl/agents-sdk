@@ -22,7 +22,7 @@ class EnvHelper
             return $default;
         }
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             return $value;
         }
 

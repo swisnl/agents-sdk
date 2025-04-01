@@ -6,7 +6,7 @@ A lightweight yet powerful framework for building multi-agent workflows in PHP, 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/swisnl/agents-sdk.svg)](https://packagist.org/packages/swisnl/agents-sdk)
 [![Software License](https://img.shields.io/packagist/l/swisnl/agents-sdk.svg)](LICENSE.md)
 [![Buy us a tree](https://img.shields.io/badge/Treeware-%F0%9F%8C%B3-lightgreen.svg)](https://plant.treeware.earth/swisnl/agents-sdk)
-[![Build Status](https://img.shields.io/github/checks-status/swisnl/agents-sdk/master?label=tests)](https://github.com/swisnl/agents-sdk/actions/workflows/tests.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/swisnl/agents-sdk/run-tests.yml?label=tests&branch=master)](https://github.com/swisnl/agents-sdk/actions/workflows/run-tests.yml)
 [![Made by SWIS](https://img.shields.io/badge/%F0%9F%9A%80-made%20by%20SWIS-%230737A9.svg)](https://www.swis.nl)
 
 ## Overview

@@ -316,4 +316,49 @@ class McpConnectionTest extends TestCase
 
         $this->assertSame($tools1, $tools2);
     }
+
+    /**
+     * Test creating an MCP connection for an SSE endpoint
+     */
+    public function testForSse(): void
+    {
+        $endpoint = 'https://example.com/events';
+
+        // Create a connection using the static method
+        $connection = McpConnection::forSse($endpoint);
+
+        // Verify the connection was created correctly
+        $this->assertInstanceOf(McpConnection::class, $connection);
+        $this->assertEquals('MCP server', $connection->getName());
+        $this->assertEquals('mcp_tools_' . md5($endpoint), $this->getPrivateProperty($connection, 'cacheKey'));
+    }
+
+    /**
+     * Test creating an MCP connection for a process
+     */
+    public function testForProcess(): void
+    {
+        $processCommand = 'node server.js';
+        $autoRestartAmount = 3;
+
+        // Create a connection using the static method
+        $connection = McpConnection::forProcess($processCommand, $autoRestartAmount);
+
+        // Verify the connection was created correctly
+        $this->assertInstanceOf(McpConnection::class, $connection);
+        $this->assertEquals('MCP server', $connection->getName());
+        $this->assertEquals('mcp_tools_' . md5($processCommand), $this->getPrivateProperty($connection, 'cacheKey'));
+    }
+
+    /**
+     * Helper method to access private properties
+     */
+    private function getPrivateProperty($object, $propertyName)
+    {
+        $reflection = new \ReflectionClass($object);
+        $property = $reflection->getProperty($propertyName);
+        $property->setAccessible(true);
+
+        return $property->getValue($object);
+    }
 }

@@ -150,10 +150,7 @@ use Swis\Agents\Mcp\McpConnection;
 use Swis\McpClient\Client;
 
 // Create an MCP connection
-$mcpConnection = new McpConnection(
-    client: Client::withSse('http://localhost:3000'),
-    name: 'My MCP Server'
-);
+$mcpConnection = McpConnection::forSse('http://localhost:3000');
 
 // Optionally restrict which tools are available
 $mcpConnection->withTools('calculator', 'weather');
@@ -177,14 +174,9 @@ Example with a local MCP server:
 
 ```php
 // Create a connection to a local MCP server with process management
-[$client, $process] = Client::withProcess(
+$mcpConnection = McpConnection::forProcess(
     command: 'node path/to/mcp-server.js',
     autoRestartAmount: 5
-);
-
-$mcpConnection = new McpConnection(
-    client: $client,
-    name: 'Local Math MCP'
 );
 
 // Add caching support

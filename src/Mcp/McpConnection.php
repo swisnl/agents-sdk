@@ -58,6 +58,42 @@ class McpConnection implements McpConnectionInterface
     }
 
     /**
+     * Create a new MCP connection for a given SSE endpoint
+     *
+     * @param string $endpoint
+     * @return self
+     */
+    public static function forSse(string $endpoint): self
+    {
+        $client = Client::withSse($endpoint);
+
+        $connection = new self($client, 'MCP server');
+        $connection->withCacheKey('mcp_tools_' . md5($endpoint));
+
+        return $connection;
+    }
+
+    /**
+     * Create a new MCP connection for a given process command
+     *
+     * @param string $processCommand The command to start the process
+     * @param int $autoRestartAmount Amount of times to allow auto-restart the process when the process terminates unexpectedly
+     * @return self
+     */
+    public static function forProcess(string $processCommand, int $autoRestartAmount = 0): self
+    {
+        [$client, $process] = Client::withProcess(
+            command: $processCommand,
+            autoRestartAmount: $autoRestartAmount
+        );
+
+        $connection = new self($client, 'MCP server');
+        $connection->withCacheKey('mcp_tools_' . md5($processCommand));
+
+        return $connection;
+    }
+
+    /**
      * Only allow specific tools to be used from this MCP connection.
      *
      * @param string ...$toolNames List of tool names to allow

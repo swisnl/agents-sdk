@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.3.0 - 2025-04-01
+
+### What's Changed
+
+* refactor: Remove illuminate/support dependency by @jormeijer in https://github.com/swisnl/agents-sdk/pull/14
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.2.1...0.3.0
+
 ## 0.2.1 - 2025-03-27
 
 ### What's Changed

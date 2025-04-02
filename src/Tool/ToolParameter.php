@@ -16,8 +16,17 @@ class ToolParameter
 {
     /**
      * @param string $description Human-readable description of the parameter
+     * @param string|null $itemsType For array properties, the type of items in the array
+     * @param string|null $objectClass For object properties, the class to cast to/from
      */
-    public function __construct(public string $description = '')
-    {
+    public function __construct(
+        public string $description = '',
+        public ?string $itemsType = null,
+        public ?string $objectClass = null
+    ) {
+        // If objectClass is set but itemsType isn't, the item type is 'object'
+        if ($this->objectClass !== null && $this->itemsType === null) {
+            $this->itemsType = 'object';
+        }
     }
 }

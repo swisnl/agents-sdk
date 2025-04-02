@@ -3,9 +3,11 @@
 namespace Swis\Agents\Traits;
 
 use OpenAI\Responses\Chat\CreateResponse;
+use Swis\Agents\DynamicTool;
 use Swis\Agents\Exceptions\BuildToolException;
 use Swis\Agents\Exceptions\HandleToolException;
 use Swis\Agents\Handoff;
+use Swis\Agents\Helpers\ArrayHelper;
 use Swis\Agents\Helpers\ToolHelper;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\ToolCall;
@@ -121,13 +123,100 @@ trait HasToolCallingTrait
             // Set each argument as a property on the tool
             $arguments = $toolCall->arguments;
             foreach ($arguments as $argument => $value) {
-                $tool->{$argument} = $value;
+                $this->setToolProperty($tool, $argument, $value);
             }
 
             return $tool;
         } catch (Throwable $e) {
             throw BuildToolException::forToolCall($toolCall, $e->getMessage());
         }
+    }
+
+    /**
+     * Set a property on a tool, handling type conversion for objects and arrays
+     *
+     * @param Tool $tool The tool to set the property on
+     * @param string $propertyName The name of the property to set
+     * @param mixed $value The value to set
+     */
+    protected function setToolProperty(Tool $tool, string $propertyName, mixed $value): void
+    {
+        // For DynamicTool, use its native property setting which already handles casting
+        if ($tool instanceof DynamicTool) {
+            $tool->{$propertyName} = $value;
+
+            return;
+        }
+
+        // For regular Tool classes, use reflection to check for special types
+        $reflection = new \ReflectionClass($tool);
+
+        // If property doesn't exist in the class, set directly and exit
+        if (! $reflection->hasProperty($propertyName)) {
+            $tool->{$propertyName} = $value;
+
+            return;
+        }
+
+        $property = $reflection->getProperty($propertyName);
+        $attributes = $property->getAttributes();
+
+        // Find ToolParameter attribute if it exists
+        $toolParamAttribute = ArrayHelper::first($attributes, fn ($attr) => $attr->getName() === Tool\ToolParameter::class);
+
+        // If no ToolParameter attribute, set directly and exit
+        if ($toolParamAttribute === null) {
+            $tool->{$propertyName} = $value;
+
+            return;
+        }
+
+        /** @var Tool\ToolParameter $toolParamAttribute */
+        $toolParamAttribute = $toolParamAttribute->newInstance();
+
+        $type = $property->getType();
+        $typeName = $type instanceof \ReflectionNamedType ? $type->getName() : null;
+
+        // Handle object types with class casting
+        if ($typeName && class_exists($typeName) && $toolParamAttribute->objectClass) {
+            $tool->{$propertyName} = $this->castToObject($value, $toolParamAttribute->objectClass);
+
+            return;
+        }
+
+        // Handle array types with object items
+        if ($typeName === 'array' && $toolParamAttribute->itemsType && $toolParamAttribute->objectClass) {
+            $tool->{$propertyName} = $this->castArrayToObjects($value, $toolParamAttribute->objectClass);
+
+            return;
+        }
+
+        // Default case: set value directly
+        $tool->{$propertyName} = $value;
+    }
+
+    /**
+     * Cast an associative array to an object of the specified class
+     *
+     * @param mixed $value The value to cast
+     * @param string $className The class name to cast to
+     * @return object The cast object
+     */
+    protected function castToObject(mixed $value, string $className): object
+    {
+        return ToolHelper::castToObject($value, $className);
+    }
+
+    /**
+     * Cast an array of associative arrays to an array of objects
+     *
+     * @param mixed $array The array to cast
+     * @param string $className The class name to cast array items to
+     * @return array<object> The cast array of objects
+     */
+    protected function castArrayToObjects(mixed $array, string $className): array
+    {
+        return ToolHelper::castArrayToObjects($array, $className);
     }
 
     /**

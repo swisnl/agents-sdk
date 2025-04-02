@@ -38,21 +38,39 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Helpers/ConversationSerializer.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Access to an undefined property Swis\\\\Agents\\\\Tool\\\\Enum\\:\\:\\$values\\.$#',
-	'identifier' => 'property.notFound',
+	'message' => '#^If condition is always true\\.$#',
+	'identifier' => 'if.alwaysTrue',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^If condition is always true\\.$#',
-	'identifier' => 'if.alwaysTrue',
-	'count' => 2,
+	'message' => '#^Left side of && is always true\\.$#',
+	'identifier' => 'booleanAnd.leftAlwaysTrue',
+	'count' => 1,
 	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^Method Swis\\\\Agents\\\\Helpers\\\\ToolHelper\\:\\:toolToDefinition\\(\\) return type has no value type specified in iterable type array\\.$#',
 	'identifier' => 'missingType.iterableValue',
 	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter \\#1 \\$objectOrClass of class ReflectionClass constructor expects class\\-string\\<T of object\\>\\|T of object, string given\\.$#',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter \\#1 \\$properties of static method Swis\\\\Agents\\\\Helpers\\\\ToolHelper\\:\\:processObjectProperties\\(\\) expects array\\<array\\<string, mixed\\>\\>, array\\<string, string\\> given\\.$#',
+	'identifier' => 'argument.type',
+	'count' => 2,
+	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter &\\$properties by\\-ref type of method Swis\\\\Agents\\\\Helpers\\\\ToolHelper\\:\\:processObjectProperties\\(\\) expects array\\<array\\<string, mixed\\>\\>, array\\<array\\<mixed\\>\\> given\\.$#',
+	'identifier' => 'parameterByRef.type',
+	'count' => 2,
 	'path' => __DIR__ . '/src/Helpers/ToolHelper.php',
 ];
 $ignoreErrors[] = [

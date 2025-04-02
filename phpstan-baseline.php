@@ -2,19 +2,13 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
-	'message' => '#^Method Swis\\\\Agents\\\\Agent\\:\\:buildRequestPayload\\(\\) return type has no value type specified in iterable type array\\.$#',
-	'identifier' => 'missingType.iterableValue',
+	'message' => '#^Method Swis\\\\Agents\\\\Agent\\:\\:buildRequestPayload\\(\\) should return array\\{model\\: string, temperature\\: float, max_completion_tokens\\: int\\|null, messages\\: array\\<Swis\\\\Agents\\\\Interfaces\\\\MessageInterface\\>, tools\\?\\: array\\{type\\: \'function\', function\\: array\\<string, mixed\\>\\}, stream_options\\?\\: array\\{include_usage\\: bool\\}\\} but returns array\\{model\\: string, temperature\\: float, max_completion_tokens\\: int\\|null, messages\\: array\\<Swis\\\\Agents\\\\Interfaces\\\\MessageInterface\\>, tools\\?\\: non\\-empty\\-array, stream_options\\?\\: array\\{include_usage\\: true\\}\\}\\.$#',
+	'identifier' => 'return.type',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Agent.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^Method Swis\\\\Agents\\\\Agent\\:\\:buildToolsPayload\\(\\) return type has no value type specified in iterable type array\\.$#',
-	'identifier' => 'missingType.iterableValue',
-	'count' => 1,
-	'path' => __DIR__ . '/src/Agent.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method Swis\\\\Agents\\\\Agent\\:\\:invokeStreamed\\(\\) has parameter \\$payload with no value type specified in iterable type array\\.$#',
 	'identifier' => 'missingType.iterableValue',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Agent.php',
@@ -66,6 +60,60 @@ $ignoreErrors[] = [
 	'identifier' => 'missingType.iterableValue',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Interfaces/TracingProcessorInterface.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Cannot access offset \'description\' on mixed\\.$#',
+	'identifier' => 'offsetAccess.nonOffsetAccessible',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Cannot access offset \'enum\' on mixed\\.$#',
+	'identifier' => 'offsetAccess.nonOffsetAccessible',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Cannot access offset \'type\' on mixed\\.$#',
+	'identifier' => 'offsetAccess.nonOffsetAccessible',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Offset \'properties\' on array\\{properties\\: array\\{type\\: string, 0\\: mixed\\}, required\\: array\\<string\\>, type\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#',
+	'identifier' => 'isset.offset',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Offset \'required\' on array\\{properties\\: array\\{type\\: string, 0\\: mixed\\}, required\\: array\\<string\\>, type\\: string\\} in isset\\(\\) always exists and is not nullable\\.$#',
+	'identifier' => 'isset.offset',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter \\#1 \\$name of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects string, int\\|string given\\.$#',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter \\#2 \\$type of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects string, mixed given\\.$#',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter \\#3 \\$description of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects string, mixed given\\.$#',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Parameter \\#5 \\$enum of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects array\\<string\\>\\|null, mixed given\\.$#',
+	'identifier' => 'argument.type',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^Property Swis\\\\Agents\\\\Model\\\\ModelSettings\\:\\:\\$modelName \\(string\\) does not accept mixed\\.$#',

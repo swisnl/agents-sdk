@@ -4,8 +4,11 @@ namespace Swis\Agents;
 
 use Closure;
 use OpenAI\Responses\Chat\CreateResponse;
+use Swis\Agents\Exceptions\McpConnectionFailed;
 use Swis\Agents\Exceptions\ModelBehaviorException;
 use Swis\Agents\Interfaces\AgentInterface;
+use Swis\Agents\Interfaces\McpConnectionInterface;
+use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Model\ModelSettings;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\Payload;
@@ -19,6 +22,8 @@ use Swis\Agents\Traits\HasToolCallingTrait;
  * tools, and settings. It can interact with an LLM to process inputs and generate appropriate
  * responses. Agents can also transfer control to other agents (handoffs) when specific
  * tasks are better handled by specialized agents.
+ *
+ * @phpstan-type RequestPayload array{model: string, temperature: float, max_completion_tokens: int|null, messages: array<MessageInterface>, tools?: array{type: 'function', function: array<string, mixed>}, stream_options?: array{include_usage: bool}}
  */
 class Agent implements AgentInterface
 {
@@ -49,6 +54,13 @@ class Agent implements AgentInterface
     protected array $handoffs = [];
 
     /**
+     * Collection of MCP connections available to this agent
+     *
+     * @var array<McpConnectionInterface>
+     */
+    protected array $mcpConnections = [];
+
+    /**
      * Creates a new Agent instance
      *
      * @param string|Closure $name The name of the agent
@@ -57,6 +69,7 @@ class Agent implements AgentInterface
      * @param ModelSettings|Closure $modelSettings LLM configuration settings
      * @param array<Tool> $tools Tools available to this agent
      * @param array<Handoff|Agent> $handoffs Other agents this agent can hand off to
+     * @param array<McpConnectionInterface> $mcpConnections MCP connections available to this agent
      */
     public function __construct(
         protected string|Closure $name,
@@ -64,7 +77,8 @@ class Agent implements AgentInterface
         protected string|Closure $instruction = '',
         protected ModelSettings|Closure $modelSettings = new ModelSettings(),
         array $tools = [],
-        array $handoffs = []
+        array $handoffs = [],
+        array $mcpConnections = []
     ) {
         if (! empty($tools)) {
             $this->withTool(...$tools);
@@ -72,6 +86,10 @@ class Agent implements AgentInterface
 
         if (! empty($handoffs)) {
             $this->withHandoff(...$handoffs);
+        }
+
+        if (! empty($mcpConnections)) {
+            $this->withMcpConnection(...$mcpConnections);
         }
     }
 
@@ -234,6 +252,19 @@ class Agent implements AgentInterface
     }
 
     /**
+     * Adds one or more MCP connections to this agent
+     *
+     * @param McpConnectionInterface ...$connections The MCP connections to add
+     * @return self
+     */
+    public function withMcpConnection(McpConnectionInterface ...$connections): self
+    {
+        $this->mcpConnections = array_merge($this->mcpConnections, $connections);
+
+        return $this;
+    }
+
+    /**
      * Gets all tools registered with this agent
      *
      * @return array<string, Tool> The registered tools
@@ -254,6 +285,16 @@ class Agent implements AgentInterface
     }
 
     /**
+     * Gets all MCP connections registered with this agent
+     *
+     * @return array<McpConnectionInterface> The registered MCP connections
+     */
+    public function mcpConnections(): array
+    {
+        return $this->mcpConnections;
+    }
+
+    /**
      * Invokes the agent, sending a request to the LLM and processing the response
      *
      * This method prepares the context, builds the request payload, and handles
@@ -262,6 +303,7 @@ class Agent implements AgentInterface
     public function invoke(): void
     {
         $this->prepareHandoffs();
+        $this->prepareMcpConnections();
         $context = $this->orchestrator->context;
 
         $context->observerInvoker()->agentBeforeInvoke($context, $this);
@@ -285,11 +327,25 @@ class Agent implements AgentInterface
     }
 
     /**
+     * Prepares all MCP connections by ensuring they are connected
+     */
+    protected function prepareMcpConnections(): void
+    {
+        foreach ($this->mcpConnections as $connection) {
+            try {
+                $connection->connect();
+            } catch (\Throwable $e) {
+                throw new McpConnectionFailed('Connecting to MCP server failed', 0, $e);
+            }
+        }
+    }
+
+    /**
      * Builds the LLM request payload
      *
      * @param RunContext $context The current run context
      *
-     * @return array{model: string, temperature: float, max_completion_tokens: int|null, messages: array<\Swis\Agents\Interfaces\MessageInterface>, tools?: non-empty-array, stream_options?: array{include_usage: true}} The complete payload for the LLM request
+     * @return RequestPayload The complete payload for the LLM request
      */
     protected function buildRequestPayload(RunContext $context): array
     {
@@ -307,6 +363,7 @@ class Agent implements AgentInterface
         $tools = $this->buildToolsPayload(
             $this->executableTools()
         );
+
         if (! empty($tools)) {
             $payload['tools'] = $tools;
         }
@@ -338,7 +395,7 @@ class Agent implements AgentInterface
      * Invokes the LLM (non-streamed)
      *
      * @param RunContext $context The current run context
-     * @param array<string, mixed> $payload The request payload
+     * @param RequestPayload $payload The request payload
      */
     protected function invokeDirect(RunContext $context, array $payload): void
     {
@@ -353,7 +410,7 @@ class Agent implements AgentInterface
      * Invokes the LLM with streaming enabled
      *
      * @param RunContext $context The current run context
-     * @param array $payload The request payload
+     * @param RequestPayload $payload The request payload
      */
     protected function invokeStreamed(RunContext $context, array $payload): void
     {
@@ -440,13 +497,13 @@ class Agent implements AgentInterface
     }
 
     /**
-     * Gets all executable tools, including tools for handoffs
+     * Gets all executable tools, including tools for handoffs and MCP tools
      *
      * @return array<Tool> The complete list of tools
      */
     protected function executableTools(): array
     {
-        return array_merge($this->tools, $this->buildHandoffTools());
+        return array_merge($this->tools, $this->buildHandoffTools(), $this->buildMcpTools());
     }
 
     /**
@@ -468,6 +525,21 @@ class Agent implements AgentInterface
         }
 
         return $tools;
+    }
+
+    /**
+     * Get the supported tools for each MCP connection
+     *
+     * @return array<string, Tool> The MCP tools
+     */
+    protected function buildMcpTools(): array
+    {
+        $mcpTools = [];
+        foreach ($this->mcpConnections as $connection) {
+            $mcpTools = array_merge($mcpTools, $connection->listTools());
+        }
+
+        return $mcpTools;
     }
 
     /**

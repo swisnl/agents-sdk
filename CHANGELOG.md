@@ -2,6 +2,15 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.4.0 - 2025-04-03
+
+### What's Changed
+
+* Feature: Add Model Context Protocol (MCP) support by @jormeijer in https://github.com/swisnl/agents-sdk/pull/15
+* Feature: Add support for array and object tool parameters by @jormeijer in https://github.com/swisnl/agents-sdk/pull/16
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.3.0...0.4.0
+
 ## 0.3.0 - 2025-04-01
 
 ### What's Changed

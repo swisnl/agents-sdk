@@ -122,4 +122,107 @@ class ToolTest extends TestCase
         $tool->param = 'test value';
         $this->assertEquals('test value', $tool());
     }
+
+    /**
+     * Test tool with array parameter
+     */
+    public function testToolWithArrayParameter(): void
+    {
+        $tool = new class () extends Tool {
+            #[ToolParameter('Array parameter', 'string')]
+            public array $arrayParam = [];
+
+            public function __invoke(): string
+            {
+                return implode(', ', $this->arrayParam);
+            }
+
+            // Expose reflection API for testing
+            public function getParamAttributes(): array
+            {
+                $reflection = new \ReflectionProperty($this, 'arrayParam');
+
+                return $reflection->getAttributes(ToolParameter::class);
+            }
+        };
+
+        // Test the parameter attribute
+        $attributes = $tool->getParamAttributes();
+        $this->assertCount(1, $attributes);
+
+        $instance = $attributes[0]->newInstance();
+        $this->assertEquals('Array parameter', $instance->description);
+        $this->assertEquals('string', $instance->itemsType);
+
+        // Test invocation with array parameter
+        $tool->arrayParam = ['value1', 'value2', 'value3'];
+        $this->assertEquals('value1, value2, value3', $tool());
+    }
+
+    /**
+     * Test tool with object parameter
+     */
+    public function testToolWithObjectParameter(): void
+    {
+        // Create a test object class for this test
+        $testObjectClass = new class () {
+            public string $property = 'test';
+
+            public function __toString(): string
+            {
+                return $this->property;
+            }
+        };
+
+        $className = get_class($testObjectClass);
+
+        $tool = new class ($className) extends Tool {
+            private string $objectClass;
+
+            #[ToolParameter('Object parameter', null, \stdClass::class)]
+            public object $objectParam;
+
+            public function __construct(string $objectClass)
+            {
+                $this->objectClass = $objectClass;
+                $this->objectParam = new $objectClass();
+            }
+
+            public function __invoke(): string
+            {
+                return (string)$this->objectParam;
+            }
+
+            // Expose reflection API for testing
+            public function getParamAttributes(): array
+            {
+                $reflection = new \ReflectionProperty($this, 'objectParam');
+
+                return $reflection->getAttributes(ToolParameter::class);
+            }
+
+            public function getObjectClassName(): string
+            {
+                return $this->objectClass;
+            }
+        };
+
+        // Test the parameter attribute
+        $attributes = $tool->getParamAttributes();
+        $this->assertCount(1, $attributes);
+
+        $instance = $attributes[0]->newInstance();
+        $this->assertEquals('Object parameter', $instance->description);
+        $this->assertEquals('object', $instance->itemsType);
+        $this->assertEquals(\stdClass::class, $instance->objectClass);
+
+        // Create a test object and set it as the parameter
+        $objectClassName = $tool->getObjectClassName();
+        $testObject = new $objectClassName();
+        $testObject->property = 'custom value';
+        $tool->objectParam = $testObject;
+
+        // Test invocation with object parameter
+        $this->assertEquals('custom value', $tool());
+    }
 }

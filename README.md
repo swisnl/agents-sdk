@@ -122,6 +122,39 @@ class SearchTool extends Tool
 }
 ```
 
+```php
+// Examples with array and object parameters
+class ProductSearchTool extends Tool
+{
+    #[ToolParameter('The product categories to search in.', itemsType: 'string')]
+    public array $categories = [];
+    
+    #[ToolParameter('Filters to apply to the search.', objectClass: SearchFilter:class)]
+    public object $filters;
+    
+    protected ?string $toolDescription = 'Searches for products with advanced filtering.';
+    
+    ...
+}
+
+class SearchFilter
+{
+    #[ToolParameter('The property to filter.'), Required]
+    public string $property;
+    
+    #[ToolParameter('The value of the filter.'), Required]
+    public string $values;;
+    
+    #[ToolParameter('The operator of the filter.')]
+    #[Enum(['eq', 'neq', 'gt', 'lt', 'gte', 'lte'])]
+    public string $operator = 'eq';
+    
+    protected ?string $toolDescription = 'Searches for products with advanced filtering.';
+    
+    ...
+}
+```
+
 ## MCP Tool Support
 
 The SDK supports the Model Context Protocol (MCP) through the `McpConnection` class, allowing you to integrate external data sources and tools with your agents.

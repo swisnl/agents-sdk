@@ -318,6 +318,22 @@ class McpConnectionTest extends TestCase
     }
 
     /**
+     * Test creating an MCP connection for a Streamable HTTP endpoint
+     */
+    public function testForStreamableHttp(): void
+    {
+        $endpoint = 'https://example.com/events';
+
+        // Create a connection using the static method
+        $connection = McpConnection::forStreamableHttp($endpoint);
+
+        // Verify the connection was created correctly
+        $this->assertInstanceOf(McpConnection::class, $connection);
+        $this->assertEquals('MCP server', $connection->getName());
+        $this->assertEquals('mcp_tools_' . md5($endpoint), $this->getPrivateProperty($connection, 'cacheKey'));
+    }
+
+    /**
      * Test creating an MCP connection for an SSE endpoint
      */
     public function testForSse(): void

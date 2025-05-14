@@ -2,6 +2,19 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.5.0 - 2025-05-14
+
+### What's Changed
+
+* build(deps): bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot in https://github.com/swisnl/agents-sdk/pull/18
+* feat: Add support for the new Streamable Http Transporter for MCP by @jormeijer in https://github.com/swisnl/agents-sdk/pull/19
+
+### New Contributors
+
+* @dependabot made their first contribution in https://github.com/swisnl/agents-sdk/pull/18
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.4.0...0.5.0
+
 ## 0.4.0 - 2025-04-03
 
 ### What's Changed

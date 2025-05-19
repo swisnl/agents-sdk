@@ -463,8 +463,8 @@ class Agent implements AgentInterface
             content: $response->choices[0]->message->content ?? null,
             role: $response->choices[0]->message->role ?? null,
             choice: $response->choices[0]->index ?? 0,
-            inputTokens: $response->usage->promptTokens,
-            outputTokens: $response->usage->completionTokens,
+            inputTokens: $response->usage?->promptTokens,
+            outputTokens: $response->usage?->completionTokens,
         );
 
         $context->observerInvoker()->agentOnResponseInterval($context, $this, $payload);

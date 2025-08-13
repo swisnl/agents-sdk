@@ -105,7 +105,7 @@ class ChatCompletionTransporter implements Transporter
                         'id' => $toolCall->id,
                         'type' => 'function',
                         'function' => ['name' => $toolCall->tool, 'arguments' => $toolCall->argumentsPayload],
-                    ]
+                    ],
                 ],
             ]
         );

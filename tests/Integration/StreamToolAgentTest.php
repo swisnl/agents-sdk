@@ -18,7 +18,7 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
             tools: [$this->weatherTool()]
         );
 
-        $this->runTest($agent);
+        $this->runAgentTest($agent);
     }
 
     public function testStreamToolAgentInteractionWithChatCompletions()
@@ -29,10 +29,10 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
             transporter: new ChatCompletionTransporter()
         );
 
-        $this->runTest($agent);
+        $this->runAgentTest($agent);
     }
 
-    protected function runTest(Agent $agent)
+    protected function runAgentTest(Agent $agent)
     {
         $tokens = 0;
         $response = $this->orchestrator

@@ -19,7 +19,7 @@ class ToolAgentTest extends BaseOrchestratorTestCase
             tools: [$this->weatherTool()]
         );
 
-        $this->runTest($agent);
+        $this->runAgentTest($agent);
     }
 
     public function testToolAgentInteractionWithChatCompletions()
@@ -30,10 +30,10 @@ class ToolAgentTest extends BaseOrchestratorTestCase
             transporter: new ChatCompletionTransporter()
         );
 
-        $this->runTest($agent);
+        $this->runAgentTest($agent);
     }
 
-    protected function runTest(Agent $agent)
+    protected function runAgentTest(Agent $agent)
     {
         $response = $this->orchestrator
             ->withUserInstruction('What is the current weather in Boston, MA?')

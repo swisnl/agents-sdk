@@ -2,7 +2,6 @@
 
 namespace Swis\Agents\Traits;
 
-use OpenAI\Responses\Chat\CreateResponse;
 use Swis\Agents\DynamicTool;
 use Swis\Agents\Exceptions\BuildToolException;
 use Swis\Agents\Exceptions\HandleToolException;
@@ -42,7 +41,7 @@ trait HasToolCallingTrait
 
             // Special handling for agent handoffs
             if ($tool instanceof Handoff) {
-                $this->executeHandoff($tool);
+                $this->executeHandoff($tool, $toolCall);
 
                 // No further processing after handoff
                 return;
@@ -88,15 +87,25 @@ trait HasToolCallingTrait
      * through a handoff tool.
      *
      * @param Handoff $handoffTool The handoff tool containing the target agent
+     * @param ToolCall $toolCall The original tool call request
      */
-    public function executeHandoff(Handoff $handoffTool): void
+    public function executeHandoff(Handoff $handoffTool, ToolCall $toolCall): void
     {
+        $context = $this->orchestrator->context;
+
         // Notify observers about the upcoming handoff
-        $this->orchestrator->context->observerInvoker()->agentBeforeHandoff(
+        $context->observerInvoker()->agentBeforeHandoff(
             $this->orchestrator->context,
             $this,
             $handoffTool->agent,
         );
+
+        // Add the tool call to the conversation context
+        $context->addMessage($toolCall);
+
+        // Create and add tool output message to the context
+        $toolOutput = new ToolOutput($handoffTool->message(), $toolCall->id);
+        $context->addMessage($toolOutput);
 
         // Execute the handoff, which will transfer control to the new agent
         $handoffTool();
@@ -250,69 +259,5 @@ trait HasToolCallingTrait
         // Create and add tool output message to the context
         $toolOutput = new ToolOutput((string) $result, $toolCall->id);
         $context->addMessage($toolOutput);
-    }
-
-    /**
-     * Check if a model response contains tool calls.
-     *
-     * @param CreateResponse $response The model response to check
-     * @return bool True if the response contains tool calls
-     */
-    protected function isToolCall(CreateResponse $response): bool
-    {
-        return ! empty($response->choices[0]->message->toolCalls);
-    }
-
-    /**
-     * Extract tool calls from a model response.
-     *
-     * Converts the raw API response format into ToolCall objects
-     * that can be processed by the agent.
-     *
-     * @param CreateResponse $response The model response containing tool calls
-     * @return array<ToolCall> List of extracted tool calls
-     */
-    protected function toolCallsFromResponse(CreateResponse $response): array
-    {
-        $toolCalls = [];
-
-        foreach ($response->choices[0]->message->toolCalls as $toolCallData) {
-            $toolCall = new ToolCall(
-                tool: $toolCallData->function->name,
-                id: $toolCallData->id,
-                argumentsPayload: $toolCallData->function->arguments,
-            );
-
-            $toolCalls[] = $toolCall;
-        }
-
-        return $toolCalls;
-    }
-
-    /**
-     * Convert a list of tools to API payload format.
-     *
-     * Transforms tool objects into the structure expected by the LLM API.
-     *
-     * @param array<Tool> $tools List of tool objects to convert
-     * @return array List of tool definitions in API format
-     */
-    protected function buildToolsPayload(array $tools): array
-    {
-        return array_values(array_map(fn (Tool $tool) => $this->toolToPayload($tool), $tools));
-    }
-
-    /**
-     * Convert a single tool to API payload format.
-     *
-     * @param Tool $tool The tool to convert
-     * @return array The tool definition in API format
-     */
-    protected function toolToPayload(Tool $tool): array
-    {
-        return [
-            'type' => 'function',
-            'function' => ToolHelper::toolToDefinition($tool),
-        ];
     }
 }

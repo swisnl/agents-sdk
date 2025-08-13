@@ -1,0 +1,89 @@
+{
+  "id": "resp_689c867c921881938289bd551177fd970a91a59adf621294",
+  "object": "response",
+  "created_at": 1755088508,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-5-nano-2025-08-07",
+  "output": [
+    {
+      "id": "rs_689c867d53588193a7715a17b9b1e3ab0a91a59adf621294",
+      "type": "reasoning",
+      "encrypted_content": "",
+      "summary": [
+        {
+          "type": "summary_text",
+          "text": "**Calculating simple arithmetic**\n\nI need to answer the question, \"What is 5 + 7?\" which is a matter of simple arithmetic. The developer's instructions say to always use the calculate tool, so I’ll call it with the expression \"5 + 7\". After that, I’ll return the result. The expected result is 12, and I can say something like \"5 + 7 = 12\" in my response. Let's go ahead and use the calculate tool for this!"
+        }
+      ]
+    },
+    {
+      "id": "fc_689c8681436c819398acb4257bcc9b6e0a91a59adf621294",
+      "type": "function_call",
+      "status": "completed",
+      "arguments": "{\"expression\":\"5 + 7\"}",
+      "call_id": "call_DYHBmtFp3OkKjifjLjVfsF38",
+      "name": "calculate"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "summary": "detailed"
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [
+    {
+      "type": "function",
+      "description": "Calculate a mathematical expression",
+      "name": "calculate",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "Mathematical expression to evaluate"
+          }
+        },
+        "required": [
+          "expression"
+        ],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  ],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 63,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 214,
+    "output_tokens_details": {
+      "reasoning_tokens": 192
+    },
+    "total_tokens": 277
+  },
+  "user": null,
+  "metadata": {}
+}

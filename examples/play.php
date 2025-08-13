@@ -1,12 +1,13 @@
 <?php
 
+use Swis\Agents\Agent;
 use Swis\Agents\AgentObserver;
 use Swis\Agents\Orchestrator;
 use Swis\Agents\Orchestrator\RunContext;
-use Swis\Agents\Response\Payload;
 use Swis\Agents\Response\ToolCall;
 use Swis\Agents\Tool;
 use Swis\Agents\Interfaces\AgentInterface;
+use Swis\Agents\Transporters\ChatCompletionTransporter;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,14 +29,20 @@ class RunAgentCommand extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $apiKey = $_ENV['OPENAI_API_KEY'] ?? password('Please provide your OpenAI API key');
+        $apiKey = getenv('OPENAI_API_KEY') ?? password('Please provide your OpenAI API key');
         $agent = select('Which agent would you like to run?', $this->listAgents());
         $stream = select('Would you like to stream the conversation?', ['Stream', 'Direct']) === 'Stream';
+        $transporter = select('What transporter do you want to use?', ['Responses', 'Chat Completions']);
 
         require_once __DIR__ . '/Agents/' . $agent;
 
         $agentClass = basename($agent, '.php');
+        /** @var Agent $agent */
         $agent = (new $agentClass())();
+
+        if ($transporter === 'Chat Completions') {
+            $agent->withTransporter(new ChatCompletionTransporter());
+        }
 
         $orchestrator = new Orchestrator($agentClass);
         $this->agentObserver($orchestrator);

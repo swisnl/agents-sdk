@@ -40,6 +40,16 @@ class Handoff extends Tool
     }
 
     /**
+     * Gets the success message that can be used to attached to the ToolCall output
+     *
+     * @return string The success message
+     */
+    public function message(): string
+    {
+        return sprintf('%s Executed successfully.', $this->defaultToolDescription());
+    }
+
+    /**
      * Generates a default tool name following the format "transfer_to_agent_name"
      *
      * @return string The generated tool name

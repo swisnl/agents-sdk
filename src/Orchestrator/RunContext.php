@@ -61,6 +61,11 @@ class RunContext
     protected ObserverInvoker $observerInvoker;
 
     /**
+     * The previous response id of a Responses request
+     */
+    protected ?string $previousResponseId = null;
+
+    /**
      * Create a new RunContext instance
      */
     public function __construct()
@@ -97,6 +102,32 @@ class RunContext
     public function withClient(ClientContract $client): self
     {
         $this->client = $client;
+
+        return $this;
+    }
+
+    /**
+     * Set the previous response id to continue the conversation
+     *
+     * @param string|null $previousResponseId The previous response id of a Responses request
+     * @return $this
+     */
+    public function withPreviousResponseId(?string $previousResponseId): self
+    {
+        $this->previousResponseId = $previousResponseId;
+
+        return $this;
+    }
+
+    /**
+     * Add a developer message to the conversation
+     *
+     * @param string $message The message content
+     * @return self
+     */
+    public function addDeveloperMessage(string $message): self
+    {
+        $this->addMessage(new Message(Message::ROLE_DEVELOPER, $message));
 
         return $this;
     }
@@ -269,6 +300,16 @@ class RunContext
     public function client(): ClientContract
     {
         return $this->client;
+    }
+
+    /**
+     * Get the previous response id to continue a Responses conversation
+     *
+     * @return string|null The previous response id
+     */
+    public function previousResponseId(): ?string
+    {
+        return $this->previousResponseId;
     }
 
     /**

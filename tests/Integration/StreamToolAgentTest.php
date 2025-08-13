@@ -7,6 +7,7 @@ use Swis\Agents\Response\Payload;
 use Swis\Agents\Tool;
 use Swis\Agents\Tool\Required;
 use Swis\Agents\Tool\ToolParameter;
+use Swis\Agents\Transporters\ChatCompletionTransporter;
 
 class StreamToolAgentTest extends BaseOrchestratorTestCase
 {
@@ -17,6 +18,22 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
             tools: [$this->weatherTool()]
         );
 
+        $this->runTest($agent);
+    }
+
+    public function testStreamToolAgentInteractionWithChatCompletions()
+    {
+        $agent = new Agent(
+            name: 'Stream Tool Agent',
+            tools: [$this->weatherTool()],
+            transporter: new ChatCompletionTransporter()
+        );
+
+        $this->runTest($agent);
+    }
+
+    protected function runTest(Agent $agent)
+    {
         $tokens = 0;
         $response = $this->orchestrator
             ->withUserInstruction('What is the current weather in Boston, MA?')
@@ -41,7 +58,6 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
         $this->assertEquals('What is the current weather in Boston, MA?', $conversation[1]->content());
 
         // Third message should be the tool call
-        $this->assertEquals('assistant', $conversation[2]->role());
         $this->assertArrayHasKey('location', $conversation[2]->arguments);
         $this->assertEquals('Boston, MA', $conversation[2]->arguments['location']);
 
@@ -56,6 +72,7 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
         // Verify final response
         $this->assertSame($agent, $response->owner());
         $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $response->content());
+
     }
 
     protected function weatherTool(): Tool

@@ -1,0 +1,89 @@
+{
+    "id": "resp_689c8cba5ac4819e97154bc194bcc183004dfca831784a8a",
+    "object": "response",
+    "created_at": 1755090106,
+    "status": "completed",
+    "background": false,
+    "error": null,
+    "incomplete_details": null,
+    "instructions": null,
+    "max_output_tokens": null,
+    "max_tool_calls": null,
+    "model": "gpt-5-nano-2025-08-07",
+    "output": [
+      {
+        "id": "rs_689c8cbb4614819ead8d5127d711f6e5004dfca831784a8a",
+        "type": "reasoning",
+        "encrypted_content": "",
+        "summary": [
+          {
+            "type": "summary_text",
+            "text": "**Fetching weather info**\n\nI need to get the current weather information, specifically for Boston, MA. I'll use the get_current_weather tool. We don’t need to run multiple tools since just one will do. Once I call functions.get_current_weather, I’ll check the response format which typically includes temperature, conditions, humidity, and wind… though I can’t be certain about the exact output. After I get the response, I’ll present it clearly and concisely to the user. Let's proceed with that call!"
+          }
+        ]
+      },
+      {
+        "id": "fc_689c8cbeafd0819eb627b2acdc03657b004dfca831784a8a",
+        "type": "function_call",
+        "status": "completed",
+        "arguments": "{\"location\":\"Boston, MA\"}",
+        "call_id": "call_trlgKnhMpYSC7CFXKw3CceUZ",
+        "name": "get_current_weather"
+      }
+    ],
+    "parallel_tool_calls": true,
+    "previous_response_id": null,
+    "prompt_cache_key": null,
+    "reasoning": {
+      "effort": "medium",
+      "summary": "detailed"
+    },
+    "safety_identifier": null,
+    "service_tier": "default",
+    "store": true,
+    "temperature": 1.0,
+    "text": {
+      "format": {
+        "type": "text"
+      },
+      "verbosity": "medium"
+    },
+    "tool_choice": "auto",
+    "tools": [
+      {
+        "type": "function",
+        "description": "Get the current weather for the specified location.",
+        "name": "get_current_weather",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "The name of the location."
+            }
+          },
+          "required": [
+            "location"
+          ],
+          "additionalProperties": false
+        },
+        "strict": true
+      }
+    ],
+    "top_logprobs": 0,
+    "top_p": 1.0,
+    "truncation": "disabled",
+    "usage": {
+      "input_tokens": 63,
+      "input_tokens_details": {
+        "cached_tokens": 0
+      },
+      "output_tokens": 215,
+      "output_tokens_details": {
+        "reasoning_tokens": 192
+      },
+      "total_tokens": 278
+    },
+    "user": null,
+    "metadata": {}
+  }

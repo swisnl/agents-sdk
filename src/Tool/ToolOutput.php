@@ -21,6 +21,15 @@ class ToolOutput extends Message
      */
     public function __construct(string $content, string $toolCallId)
     {
-        parent::__construct(Message::ROLE_TOOL, $content, ['tool_call_id' => $toolCallId]);
+        parent::__construct(Message::ROLE_TOOL, $content, ['call_id' => $toolCallId]);
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'call_id' => $this->parameters['call_id'],
+            'output' => $this->content,
+            'type' => 'function_call_output',
+        ];
     }
 }

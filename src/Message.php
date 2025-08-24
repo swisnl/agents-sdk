@@ -19,6 +19,7 @@ class Message implements OwnableMessageInterface, JsonSerializable
      * Standard role constants for different message types.
      */
     public const ROLE_SYSTEM = 'system';       // System instructions or context
+    public const ROLE_DEVELOPER = 'developer'; // System instructions or context
     public const ROLE_ASSISTANT = 'assistant'; // AI-generated responses
     public const ROLE_USER = 'user';           // Human/user inputs
     public const ROLE_TOOL = 'tool';           // Tool execution results
@@ -31,15 +32,15 @@ class Message implements OwnableMessageInterface, JsonSerializable
     /**
      * Create a new message.
      *
-     * @param string $role           The message role (system, user, assistant, tool)
+     * @param string|null $role      The message role (system, user, assistant, tool)
      * @param string|null $content   The message content text
      * @param array<string, mixed> $parameters      Additional parameters specific to message type
      * @param int|null $inputTokens  Number of tokens in input processing, for usage tracking
      * @param int|null $outputTokens Number of tokens in output generation, for usage tracking
      */
     public function __construct(
-        protected string $role,
-        protected ?string $content,
+        protected ?string $role = null,
+        protected ?string $content = null,
         protected array $parameters = [],
         protected ?int $inputTokens = null,
         protected ?int $outputTokens = null,
@@ -49,9 +50,9 @@ class Message implements OwnableMessageInterface, JsonSerializable
     /**
      * Get the role of the message.
      *
-     * @return string The message role (system, user, assistant, tool)
+     * @return string|null The message role (system, developer, user, assistant, tool)
      */
-    public function role(): string
+    public function role(): ?string
     {
         return $this->role;
     }
@@ -123,11 +124,11 @@ class Message implements OwnableMessageInterface, JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return [
+        return array_filter([
             'role' => $this->role,
             'content' => $this->content,
             ...$this->parameters,
-        ];
+        ], fn ($value) => $value !== null);
     }
 
     /**

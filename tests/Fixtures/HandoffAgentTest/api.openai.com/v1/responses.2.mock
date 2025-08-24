@@ -1,0 +1,76 @@
+{
+  "id": "resp_689c8f090be481919e996ca37f3a25e7015b7a3f549951f4",
+  "object": "response",
+  "created_at": 1755090697,
+  "status": "completed",
+  "background": false,
+  "error": null,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-5-nano-2025-08-07",
+  "output": [
+    {
+      "id": "rs_689c8f09d24c819185c79f4179c05f93015b7a3f549951f4",
+      "type": "reasoning",
+      "encrypted_content": "",
+      "summary": []
+    },
+    {
+      "id": "fc_689c8f0b9ab8819188a4a6e49f9ba248015b7a3f549951f4",
+      "type": "function_call",
+      "status": "completed",
+      "arguments": "{}",
+      "call_id": "call_7ZlouCV6yr09LiefReEobn3I",
+      "name": "transfer_to_target_agent"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "reasoning": {
+    "effort": "medium",
+    "summary": "detailed"
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tools": [
+    {
+      "type": "function",
+      "description": "Transfers data or control to the target agent",
+      "name": "transfer_to_target_agent",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "strict": false
+    }
+  ],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 55,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 210,
+    "output_tokens_details": {
+      "reasoning_tokens": 192
+    },
+    "total_tokens": 265
+  },
+  "user": null,
+  "metadata": {}
+}

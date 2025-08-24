@@ -8,7 +8,7 @@ class ModelSettings
 {
     public function __construct(
         public string $modelName = '',
-        public float $temperature = .7,
+        public float $temperature = 1.0,
         public ?int $maxTokens = null,
     ) {
         if (empty($this->modelName)) {

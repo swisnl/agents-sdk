@@ -35,6 +35,7 @@ class ConversationSerializer
 
         $serialized = [
             'conversation' => $serializedMessages,
+            'previous_response_id' => $context->previousResponseId(),
             'metadata' => [
                 'serialized_at' => time(),
                 'version' => '1.0',
@@ -73,6 +74,6 @@ class ConversationSerializer
             $context->addMessage($message);
         }
 
-        return $context;
+        return $context->withPreviousResponseId($data['previous_response_id'] ?? null);
     }
 }

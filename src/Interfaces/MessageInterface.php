@@ -4,7 +4,7 @@ namespace Swis\Agents\Interfaces;
 
 interface MessageInterface
 {
-    public function role(): string;
+    public function role(): ?string;
 
     public function content(): ?string;
 

@@ -20,6 +20,7 @@ Agents SDK provides an elegant abstraction for creating AI agent systems in PHP,
 - Monitor agent behavior with observers and traces
 - Serialize and deserialize conversations for state management
 - Connect to external tools using the Model Context Protocol (MCP)
+- Use both the Responses- and Chat Completions API
 
 The SDK is designed to be flexible, extensible, and easy to use while providing a robust foundation for building complex multi-agent based systems.
 
@@ -91,6 +92,22 @@ $agent = new Agent(
     tools: [$tool1, $tool2],        // Optional: Array of tools the agent can use
     handoffs: [$otherAgent]         // Optional: Other agents this agent can hand off to
 );
+```
+
+## Using Chat Completions API
+
+By default, agents will use the Responses API. You can control what endpoint the agent will use by giving it the correct Transporter.
+
+Note that Native Tools are only supported by the Responses API.
+
+```php
+$agent = new Agent(
+    name: 'Agent Name',
+    transporter: new ChatCompletionsTransporter()
+);
+
+// Or
+$agent->withTransporter(new ChatCompletionsTransporter());
 ```
 
 ## Defining Tools

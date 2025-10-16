@@ -25,6 +25,13 @@ interface AgentInterface
     public function setOrchestrator(Orchestrator $orchestrator): void;
 
     /**
+     * Gets the orchestrator that manages this agent
+     *
+     * @return Orchestrator $orchestrator The orchestrator instance for this Agent
+     */
+    public function orchestrator(): Orchestrator;
+
+    /**
      * Gets the name of this agent
      *
      * @return string The unique name identifying this agent

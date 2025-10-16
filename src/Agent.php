@@ -3,17 +3,14 @@
 namespace Swis\Agents;
 
 use Closure;
-use OpenAI\Responses\Chat\CreateResponse;
 use Swis\Agents\Exceptions\McpConnectionFailed;
 use Swis\Agents\Exceptions\ModelBehaviorException;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\McpConnectionInterface;
-use Swis\Agents\Interfaces\MessageInterface;
+use Swis\Agents\Interfaces\Transporter;
 use Swis\Agents\Model\ModelSettings;
-use Swis\Agents\Orchestrator\RunContext;
-use Swis\Agents\Response\Payload;
-use Swis\Agents\Response\StreamedResponseWrapper;
 use Swis\Agents\Traits\HasToolCallingTrait;
+use Swis\Agents\Transporters\ResponsesTransporter;
 
 /**
  * Agent class is the core component of the Agents SDK
@@ -22,8 +19,6 @@ use Swis\Agents\Traits\HasToolCallingTrait;
  * tools, and settings. It can interact with an LLM to process inputs and generate appropriate
  * responses. Agents can also transfer control to other agents (handoffs) when specific
  * tasks are better handled by specialized agents.
- *
- * @phpstan-type RequestPayload array{model: string, temperature: float, max_completion_tokens: int|null, messages: array<MessageInterface>, tools?: array{type: 'function', function: array<string, mixed>}, stream_options?: array{include_usage: bool}}
  */
 class Agent implements AgentInterface
 {
@@ -61,6 +56,11 @@ class Agent implements AgentInterface
     protected array $mcpConnections = [];
 
     /**
+     * Handles communication with the OpenAI API.
+     */
+    protected Transporter $transporter;
+
+    /**
      * Creates a new Agent instance
      *
      * @param string|Closure $name The name of the agent
@@ -70,6 +70,7 @@ class Agent implements AgentInterface
      * @param array<Tool> $tools Tools available to this agent
      * @param array<Handoff|Agent> $handoffs Other agents this agent can hand off to
      * @param array<McpConnectionInterface> $mcpConnections MCP connections available to this agent
+     * @param Transporter|null $transporter Transporter to use (e.g. Chat Completions instead of Responses)
      */
     public function __construct(
         protected string|Closure $name,
@@ -78,7 +79,8 @@ class Agent implements AgentInterface
         protected ModelSettings|Closure $modelSettings = new ModelSettings(),
         array $tools = [],
         array $handoffs = [],
-        array $mcpConnections = []
+        array $mcpConnections = [],
+        ?Transporter $transporter = null
     ) {
         if (! empty($tools)) {
             $this->withTool(...$tools);
@@ -91,6 +93,26 @@ class Agent implements AgentInterface
         if (! empty($mcpConnections)) {
             $this->withMcpConnection(...$mcpConnections);
         }
+
+        $this->transporter = $transporter ?? new ResponsesTransporter();
+    }
+
+    /**
+     * Set a custom transporter.
+     */
+    public function withTransporter(Transporter $transporter): self
+    {
+        $this->transporter = $transporter;
+
+        return $this;
+    }
+
+    /**
+     * Get the transporter in use.
+     */
+    public function transporter(): Transporter
+    {
+        return $this->transporter;
     }
 
     /**
@@ -101,6 +123,14 @@ class Agent implements AgentInterface
     public function setOrchestrator(Orchestrator $orchestrator): void
     {
         $this->orchestrator = $orchestrator;
+    }
+
+    /**
+     * Gets the orchestrator for this agent
+     */
+    public function orchestrator(): Orchestrator
+    {
+        return $this->orchestrator;
     }
 
     /**
@@ -308,16 +338,8 @@ class Agent implements AgentInterface
 
         $context->observerInvoker()->agentBeforeInvoke($context, $this);
 
-        $payload = $this->buildRequestPayload($context);
-
         try {
-            if ($context->isStreamed()) {
-                $this->invokeStreamed($context, $payload);
-
-                return;
-            }
-
-            $this->invokeDirect($context, $payload);
+            $this->transporter->invoke($this, $context);
         } catch (ModelBehaviorException $e) {
             // If the model behavior is incorrect, add the error message and
             // let the model retry
@@ -341,46 +363,11 @@ class Agent implements AgentInterface
     }
 
     /**
-     * Builds the LLM request payload
-     *
-     * @param RunContext $context The current run context
-     *
-     * @return RequestPayload The complete payload for the LLM request
-     */
-    protected function buildRequestPayload(RunContext $context): array
-    {
-        $modelSettings = $this->modelSettings();
-        $instruction = $this->prepareInstruction();
-        $context->withSystemMessage($instruction);
-
-        $payload = [
-            'model' => $modelSettings->modelName,
-            'temperature' => $modelSettings->temperature,
-            'max_completion_tokens' => $modelSettings->maxTokens,
-            'messages' => $context->conversation(),
-        ];
-
-        $tools = $this->buildToolsPayload(
-            $this->executableTools()
-        );
-
-        if (! empty($tools)) {
-            $payload['tools'] = $tools;
-        }
-
-        if ($context->isStreamed()) {
-            $payload['stream_options'] = ['include_usage' => true];
-        }
-
-        return $payload;
-    }
-
-    /**
      * Prepares the instruction by combining handoff instruction if needed
      *
      * @return string The complete instruction for the LLM
      */
-    protected function prepareInstruction(): string
+    public function prepareInstruction(): string
     {
         $instruction = $this->instruction();
 
@@ -389,100 +376,6 @@ class Agent implements AgentInterface
         }
 
         return $instruction;
-    }
-
-    /**
-     * Invokes the LLM (non-streamed)
-     *
-     * @param RunContext $context The current run context
-     * @param RequestPayload $payload The request payload
-     */
-    protected function invokeDirect(RunContext $context, array $payload): void
-    {
-        $response = $context->client()
-            ->chat()
-            ->create($payload);
-
-        $this->handleResponse($context, $response);
-    }
-
-    /**
-     * Invokes the LLM with streaming enabled
-     *
-     * @param RunContext $context The current run context
-     * @param RequestPayload $payload The request payload
-     */
-    protected function invokeStreamed(RunContext $context, array $payload): void
-    {
-        $response = $context->client()
-            ->chat()
-            ->createStreamed($payload);
-
-        $streamedResponse = new StreamedResponseWrapper($response, $this);
-
-        $message = '';
-        $lastPayload = null;
-
-        // Process each token of the streamed response
-        foreach ($streamedResponse as $responsePayload) {
-            $context->observerInvoker()->agentOnResponseInterval($context, $this, $responsePayload);
-
-            if (isset($responsePayload->content)) {
-                $message .= $responsePayload->content;
-            }
-
-            $lastPayload = $responsePayload;
-        }
-
-        // After receiving all tokens, create the complete message
-        if (! empty($message) && isset($lastPayload)) {
-            $lastPayload->content = $message;
-            $context->addAgentMessage($lastPayload, $this);
-            if ($context->lastMessage() !== null) {
-                $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
-            }
-        }
-    }
-
-    /**
-     * Handles the response from the LLM
-     *
-     * @param RunContext $context The current run context
-     * @param CreateResponse $response The response from the LLM
-     */
-    protected function handleResponse(RunContext $context, CreateResponse $response): void
-    {
-        if ($this->isToolCall($response)) {
-            $this->handleToolCallResponse($response);
-
-            return;
-        }
-
-        // Create a payload from the text response
-        $payload = new Payload(
-            content: $response->choices[0]->message->content ?? null,
-            role: $response->choices[0]->message->role ?? null,
-            choice: $response->choices[0]->index ?? 0,
-            inputTokens: $response->usage?->promptTokens,
-            outputTokens: $response->usage?->completionTokens,
-        );
-
-        $context->observerInvoker()->agentOnResponseInterval($context, $this, $payload);
-        $context->addAgentMessage($payload, $this);
-        if ($context->lastMessage() !== null) {
-            $context->observerInvoker()->agentOnResponse($context, $this, $context->lastMessage());
-        }
-    }
-
-    /**
-     * Handles a tool call response from the LLM
-     *
-     * @param CreateResponse $response The response containing tool calls
-     */
-    protected function handleToolCallResponse(CreateResponse $response): void
-    {
-        $toolCalls = $this->toolCallsFromResponse($response);
-        $this->executeTools($toolCalls);
     }
 
     /**
@@ -501,7 +394,7 @@ class Agent implements AgentInterface
      *
      * @return array<Tool> The complete list of tools
      */
-    protected function executableTools(): array
+    public function executableTools(): array
     {
         return array_merge($this->tools, $this->buildHandoffTools(), $this->buildMcpTools());
     }

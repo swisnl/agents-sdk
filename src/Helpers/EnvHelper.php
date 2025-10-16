@@ -16,7 +16,7 @@ class EnvHelper
      */
     public static function get(string $key, $default = null)
     {
-        $value = $_ENV[$key] ?? false;
+        $value = $_ENV[$key] ?? getenv($key);
 
         if ($value === false) {
             return $default;

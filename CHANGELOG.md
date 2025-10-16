@@ -2,6 +2,20 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.6.0 - 2025-10-16
+
+### What's Changed
+
+* build(deps): update openai-php/client requirement from ^0.10.3 to ^0.10.3 || ^0.13.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/20
+* build(deps): bump stefanzweifel/git-auto-commit-action from 5 to 6 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/22
+* build(deps): update openai-php/client requirement from ^0.10.3 || ^0.13.0 to ^0.10.3 || ^0.13.0 || ^0.15.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/24
+* build(deps): bump actions/checkout from 4 to 5 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/26
+* build(deps): update openai-php/client requirement from ^0.10.3 || ^0.13.0 || ^0.15.0 to ^0.10.3 || ^0.13.0 || ^0.15.0 || ^0.17.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/28
+* build(deps): bump stefanzweifel/git-auto-commit-action from 6 to 7 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/29
+* Feature/add responses api support by @jormeijer in https://github.com/swisnl/agents-sdk/pull/25
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.5.0...0.6.0
+
 ## 0.5.0 - 2025-05-14
 
 ### What's Changed

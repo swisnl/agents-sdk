@@ -62,20 +62,32 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Interfaces/TracingProcessorInterface.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Cannot access offset \'description\' on mixed\\.$#',
-	'identifier' => 'offsetAccess.nonOffsetAccessible',
+	'message' => '#^Call to function assert\\(\\) with false will always evaluate to false\\.$#',
+	'identifier' => 'function.impossibleType',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Mcp/McpTool.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Cannot access offset \'enum\' on mixed\\.$#',
-	'identifier' => 'offsetAccess.nonOffsetAccessible',
+	'message' => '#^Call to function assert\\(\\) with true will always evaluate to true\\.$#',
+	'identifier' => 'function.alreadyNarrowedType',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Mcp/McpTool.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Cannot access offset \'type\' on mixed\\.$#',
-	'identifier' => 'offsetAccess.nonOffsetAccessible',
+	'message' => '#^Call to function is_array\\(\\) with string will always evaluate to false\\.$#',
+	'identifier' => 'function.impossibleType',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Offset \'description\' on \\*NEVER\\* on left side of \\?\\? always exists and is not nullable\\.$#',
+	'identifier' => 'nullCoalesce.offset',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Mcp/McpTool.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Offset \'enum\' on \\*NEVER\\* on left side of \\?\\? always exists and is not nullable\\.$#',
+	'identifier' => 'nullCoalesce.offset',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Mcp/McpTool.php',
 ];
@@ -92,26 +104,8 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Mcp/McpTool.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Parameter \\#1 \\$name of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects string, int\\|string given\\.$#',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/src/Mcp/McpTool.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Parameter \\#2 \\$type of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects string, mixed given\\.$#',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/src/Mcp/McpTool.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Parameter \\#3 \\$description of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects string, mixed given\\.$#',
-	'identifier' => 'argument.type',
-	'count' => 1,
-	'path' => __DIR__ . '/src/Mcp/McpTool.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Parameter \\#5 \\$enum of method Swis\\\\Agents\\\\DynamicTool\\:\\:withDynamicProperty\\(\\) expects array\\<string\\>\\|null, mixed given\\.$#',
-	'identifier' => 'argument.type',
+	'message' => '#^Offset \'type\' on \\*NEVER\\* on left side of \\?\\? always exists and is not nullable\\.$#',
+	'identifier' => 'nullCoalesce.offset',
 	'count' => 1,
 	'path' => __DIR__ . '/src/Mcp/McpTool.php',
 ];

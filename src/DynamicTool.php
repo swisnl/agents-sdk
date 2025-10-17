@@ -10,7 +10,7 @@ use Swis\Agents\Helpers\ToolHelper;
  * Tools are executable components that provide specific functionality to agents.
  * They can be invoked by agents to perform operations and return results.
  *
- * @phpstan-type ToolProperty array{type: string, description: string, required: bool, enum?: array<string>, itemsType?: string, objectClass?: string}
+ * @phpstan-type ToolProperty array{type: string, description: string, required: bool, enum?: array<string>, itemsType?: string, objectClass?: string, schema?: array<string, mixed>}
  */
 abstract class DynamicTool extends Tool
 {
@@ -56,6 +56,7 @@ abstract class DynamicTool extends Tool
      * @param array<string>|null $enum Optional enum values
      * @param string|null $itemsType For array properties, the type of items in the array
      * @param string|null $objectClass For object properties, the class to cast to/from
+     * @param array<mixed>|null $customSchema Use a custom schema definition
      * @return self
      */
     public function withDynamicProperty(
@@ -65,7 +66,8 @@ abstract class DynamicTool extends Tool
         bool $required = false,
         ?array $enum = null,
         ?string $itemsType = null,
-        ?string $objectClass = null
+        ?string $objectClass = null,
+        ?array $customSchema = null
     ): self {
         $property = [
             'type' => $type,
@@ -83,6 +85,10 @@ abstract class DynamicTool extends Tool
 
         if ($objectClass !== null) {
             $property['objectClass'] = $objectClass;
+        }
+
+        if ($customSchema !== null) {
+            $property['schema'] = $customSchema;
         }
 
         $this->dynamicProperties[$name] = $property;

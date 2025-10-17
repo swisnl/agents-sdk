@@ -78,9 +78,13 @@ class McpTool extends DynamicTool
         if (empty($schema) || ! isset($schema['properties'])) {
             return;
         }
+        assert(is_array($schema['properties']));
 
         // For each property in the schema, register a dynamic property
         foreach ($schema['properties'] as $propName => $propDetails) {
+            assert(is_string($propName));
+            assert(is_array($propDetails));
+
             // Get the property description
             $description = $propDetails['description'] ?? "Parameter: {$propName}";
 
@@ -96,8 +100,23 @@ class McpTool extends DynamicTool
             // Get enum values if they exist
             $enum = $propDetails['enum'] ?? null;
 
+            // Get the items type when the type is array
+            $itemsType = $propDetails['items']['type'] ?? null;
+
+            // Cast object types to stdClass
+            $objectClass = $itemsType === 'object' ? \stdClass::class : null;
+
             // Register the dynamic property
-            $this->withDynamicProperty($propName, $type, $description, $required, $enum);
+            $this->withDynamicProperty(
+                name: $propName,
+                type: $type,
+                description: $description,
+                required: $required,
+                enum: $enum,
+                itemsType: $itemsType,
+                objectClass: $objectClass,
+                customSchema: $propDetails,
+            );
         }
     }
 }

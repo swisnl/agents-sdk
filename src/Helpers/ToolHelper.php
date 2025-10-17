@@ -261,6 +261,14 @@ class ToolHelper
     {
         $dynamicProps = $tool->getDynamicProperties();
         foreach ($dynamicProps as $propName => $propDetails) {
+
+            // Use the schema definition when available
+            if (isset($propDetails['schema'])) {
+                $properties[$propName] = $propDetails['schema'];
+
+                continue;
+            }
+
             $properties[$propName] = [
                 'type' => $propDetails['type'],
                 'description' => $propDetails['description'],

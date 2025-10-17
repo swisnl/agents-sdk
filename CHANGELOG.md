@@ -2,6 +2,15 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.6.1 - 2025-10-17
+
+### What's Changed
+
+* Propagate the variable that contains the process resource by @jormeijer in https://github.com/swisnl/agents-sdk/pull/32
+* Use native schema definition for MCP tools by @jormeijer in https://github.com/swisnl/agents-sdk/pull/33
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.6.0...0.6.1
+
 ## 0.6.0 - 2025-10-16
 
 ### What's Changed

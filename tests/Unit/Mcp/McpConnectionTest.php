@@ -358,7 +358,7 @@ class McpConnectionTest extends TestCase
         $autoRestartAmount = 3;
 
         // Create a connection using the static method
-        $connection = McpConnection::forProcess($processCommand, $autoRestartAmount);
+        [$connection, $process] = McpConnection::forProcess($processCommand, $autoRestartAmount);
 
         // Verify the connection was created correctly
         $this->assertInstanceOf(McpConnection::class, $connection);

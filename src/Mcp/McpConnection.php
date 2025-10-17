@@ -94,9 +94,9 @@ class McpConnection implements McpConnectionInterface
      *
      * @param string $processCommand The command to start the process
      * @param int $autoRestartAmount Amount of times to allow auto-restart the process when the process terminates unexpectedly
-     * @return self
+     * @return array{0: self, 1: resource}
      */
-    public static function forProcess(string $processCommand, int $autoRestartAmount = 0): self
+    public static function forProcess(string $processCommand, int $autoRestartAmount = 0): array
     {
         [$client, $process] = Client::withProcess(
             command: $processCommand,
@@ -106,7 +106,7 @@ class McpConnection implements McpConnectionInterface
         $connection = new self($client, 'MCP server');
         $connection->withCacheKey('mcp_tools_' . md5($processCommand));
 
-        return $connection;
+        return [$connection, $process];
     }
 
     /**

@@ -224,7 +224,7 @@ Example with a local MCP server:
 
 ```php
 // Create a connection to a local MCP server with process management
-$mcpConnection = McpConnection::forProcess(
+[$mcpConnection, $process] = McpConnection::forProcess(
     command: 'node path/to/mcp-server.js',
     autoRestartAmount: 5
 );

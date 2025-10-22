@@ -28,6 +28,7 @@ class ResponsesTransporter implements Transporter
     public function invoke(Agent $agent, RunContext $context): void
     {
         $payload = $this->buildRequestPayload($agent, $context);
+        $context->startNewRun();
 
         if ($context->isStreamed()) {
             $this->invokeStreamed($agent, $context, $payload);
@@ -82,8 +83,25 @@ class ResponsesTransporter implements Transporter
         ];
 
         $inputs = array_filter($context->conversation(), fn (MessageInterface $message) => in_array($message->role(), $allowedRolesForInput));
+        $inputs = $this->appendToolOutputsToInputs($inputs, $context);
 
         return $this->appendLastMessageToInputs($inputs, $context);
+    }
+
+    /**
+     * Append the toolOutputs for the current run
+     *
+     * @param array<MessageInterface> $inputs
+     * @param RunContext $context
+     * @return array<MessageInterface>
+     */
+    protected function appendToolOutputsToInputs(array $inputs, RunContext $context): array
+    {
+        foreach ($context->toolOutputsForCurrentRun() as $toolOutput) {
+            $inputs[] = $toolOutput;
+        }
+
+        return $inputs;
     }
 
     /**

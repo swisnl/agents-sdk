@@ -11,6 +11,7 @@ use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Interfaces\OwnableMessageInterface;
 use Swis\Agents\Message;
 use Swis\Agents\Response\Payload;
+use Swis\Agents\Tool\ToolOutput;
 use Swis\Agents\ToolObserver;
 
 /**
@@ -35,6 +36,13 @@ class RunContext
      * @var array<MessageInterface>
      */
     protected array $conversation = [];
+
+    /**
+     * The toolOutputs for this run
+     *
+     * @var array<ToolOutput>
+     */
+    protected array $toolOutputs = [];
 
     /**
      * Registered agent observers
@@ -289,6 +297,10 @@ class RunContext
             $message->setOwner($owner);
         }
 
+        if ($message instanceof ToolOutput) {
+            $this->toolOutputs[] = $message;
+        }
+
         $this->conversation[] = $message;
     }
 
@@ -330,6 +342,24 @@ class RunContext
     public function conversation(): array
     {
         return $this->conversation;
+    }
+
+    /**
+     * Get the toolOutputs for the current run
+     *
+     * @return array<ToolOutput> The toolOutputs for this run
+     */
+    public function toolOutputsForCurrentRun(): array
+    {
+        return $this->toolOutputs;
+    }
+
+    /**
+     * Let the context know we are starting a new run
+     */
+    public function startNewRun(): void
+    {
+        $this->toolOutputs = [];
     }
 
     /**

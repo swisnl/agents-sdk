@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.7.1 - 2025-10-23
+
+### What's Changed
+
+* Fix: Wait for all tool calls to roll in before executing them by @jormeijer in https://github.com/swisnl/agents-sdk/pull/36
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.7.0...0.7.1
+
 ## 0.7.0 - 2025-10-22
 
 ### What's Changed

@@ -110,7 +110,7 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             assert($response instanceof CreateStreamedResponse);
             $this->generated[] = $response;
 
-            if ($response->response instanceof CreateResponse) {
+            if ($response->event === 'response.created' && $response->response instanceof CreateResponse) {
                 $this->agent->orchestrator()->context->withPreviousResponseId($response->response->id);
 
                 continue;
@@ -133,7 +133,7 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             }
 
             // and execute them when done collecting
-            if (! empty($capturedToolCalls) && $response->event === 'response.output_item.done') {
+            if (! empty($capturedToolCalls) && $response->event === 'response.completed') {
                 $this->agent->executeTools($capturedToolCalls);
 
                 break;

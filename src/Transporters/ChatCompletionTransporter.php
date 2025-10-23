@@ -51,6 +51,7 @@ class ChatCompletionTransporter implements Transporter
             'temperature' => $modelSettings->temperature,
             'max_completion_tokens' => $modelSettings->maxTokens,
             'messages' => $this->buildInputs($agent, $context),
+            ...$modelSettings->extraOptions ?? [],
         ];
 
         $tools = $this->buildToolsPayload($agent->executableTools());

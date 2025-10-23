@@ -2,15 +2,18 @@
 
 namespace Swis\Agents\Traits;
 
+use Swis\Agents\Agent;
 use Swis\Agents\DynamicTool;
 use Swis\Agents\Exceptions\BuildToolException;
 use Swis\Agents\Exceptions\HandleToolException;
 use Swis\Agents\Handoff;
 use Swis\Agents\Helpers\ArrayHelper;
 use Swis\Agents\Helpers\ToolHelper;
+use Swis\Agents\Interfaces\ToolExecutorInterface;
 use Swis\Agents\Orchestrator\RunContext;
 use Swis\Agents\Response\ToolCall;
 use Swis\Agents\Tool;
+use Swis\Agents\Tool\ToolExecutor;
 use Swis\Agents\Tool\ToolOutput;
 use Throwable;
 
@@ -26,6 +29,8 @@ use Throwable;
  */
 trait HasToolCallingTrait
 {
+    protected ToolExecutorInterface $toolExecutor;
+
     /**
      * Execute a list of tool calls.
      *
@@ -36,22 +41,40 @@ trait HasToolCallingTrait
      */
     public function executeTools(array $toolCalls): void
     {
-        foreach ($toolCalls as $toolCall) {
-            $tool = $this->buildTool($toolCall);
+        $tools = array_map(fn (ToolCall $toolCall) => [$this->buildTool($toolCall), $toolCall,], array_values($toolCalls));
 
-            // Special handling for agent handoffs
-            if ($tool instanceof Handoff) {
-                $this->executeHandoff($tool, $toolCall);
+        // Special handling for agent handoffs
+        $handoffs = array_filter($tools, fn (array $tool) => $tool[0] instanceof Handoff);
 
-                // No further processing after handoff
-                return;
-            }
+        if (! empty($handoffs)) {
+            [$tool, $toolCall] = $handoffs[0];
 
-            $this->executeTool($tool, $toolCall);
+            // No further processing after handoff
+            $this->executeHandoff($tool, $toolCall);
+
+            return;
         }
+
+        $executor = $this->toolExecutor ?? $this->defaultToolExecutor();
+        $executor->executeTools($tools, $this);
 
         // After all tools are executed, give control back to the agent
         $this->invoke();
+    }
+
+    /**
+     * Use a different Tool Executor.
+     *
+     * This allows you to execute tools in parallel.
+     *
+     * @param ToolExecutorInterface $toolExecutor
+     * @return Agent
+     */
+    public function withToolExecutor(ToolExecutorInterface $toolExecutor): self
+    {
+        $this->toolExecutor = $toolExecutor;
+
+        return $this;
     }
 
     /**
@@ -259,5 +282,10 @@ trait HasToolCallingTrait
         // Create and add tool output message to the context
         $toolOutput = new ToolOutput((string) $result, $toolCall->id);
         $context->addMessage($toolOutput);
+    }
+
+    protected function defaultToolExecutor(): ToolExecutorInterface
+    {
+        return new ToolExecutor();
     }
 }

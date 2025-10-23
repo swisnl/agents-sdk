@@ -2,6 +2,7 @@
 
 namespace Swis\Agents;
 
+use OpenAI\Responses\Responses\CreateStreamedResponse;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Orchestrator\RunContext;
@@ -39,6 +40,43 @@ abstract class AgentObserver
      * @return void
      */
     public function onResponseInterval(AgentInterface $agent, Payload $payload, RunContext $context): void
+    {
+    }
+
+    /**
+     * Called when an agent generates a complete reasoning message
+     *
+     * @param AgentInterface $agent The agent that generated the response
+     * @param MessageInterface $message The complete reasoning message that was generated
+     * @param RunContext $context The execution context
+     * @return void
+     */
+    public function onReasoning(AgentInterface $agent, MessageInterface $message, RunContext $context): void
+    {
+    }
+
+    /**
+     * Called during streaming when a partial reasoning token is received
+     *
+     * @param AgentInterface $agent The agent that generated the response token
+     * @param Payload $payload The reasoning payload
+     * @param RunContext $context The execution context
+     * @return void
+     */
+    public function onReasoningInterval(AgentInterface $agent, Payload $payload, RunContext $context): void
+    {
+    }
+
+    /**
+     * Called during streaming when an SSE event is received
+     *
+     * @param RunContext $context The run context
+     * @param AgentInterface $agent The agent that generated the reasoning token
+     * @param string $event The name of the event
+     * @param CreateStreamedResponse $response The response belonging to the event
+     * @return void
+     */
+    public function onStreamEvent(AgentInterface $agent, string $event, CreateStreamedResponse $response, RunContext $context): void
     {
     }
 

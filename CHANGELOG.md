@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.8.1 - 2025-10-23
+
+### What's Changed
+
+* Feat: Add additional ModelSettings options by @jormeijer in https://github.com/swisnl/agents-sdk/pull/39
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.8.0...0.8.1
+
 ## 0.8.0 - 2025-10-23
 
 ### What's Changed

@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.8.0 - 2025-10-23
+
+### What's Changed
+
+* Feat: Add support for observing reasoning tokens by @jormeijer in https://github.com/swisnl/agents-sdk/pull/38
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.7.2...0.8.0
+
 ## 0.7.2 - 2025-10-23
 
 ### What's Changed

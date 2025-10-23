@@ -55,6 +55,7 @@ class ResponsesTransporter implements Transporter
             'max_output_tokens' => $modelSettings->maxTokens,
             'previous_response_id' => $context->previousResponseId(),
             'input' => $this->buildInputs($agent, $context),
+            ...$modelSettings->extraOptions ?? [],
         ];
 
         $tools = $this->buildToolsPayload($agent->executableTools());

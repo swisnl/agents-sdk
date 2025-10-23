@@ -8,8 +8,11 @@ use OpenAI\Responses\Responses\CreateResponse;
 use OpenAI\Responses\Responses\CreateStreamedResponse;
 use OpenAI\Responses\Responses\Streaming\OutputItem;
 use OpenAI\Responses\Responses\Streaming\OutputTextDelta;
+use OpenAI\Responses\Responses\Streaming\ReasoningSummaryTextDelta;
+use OpenAI\Responses\Responses\Streaming\ReasoningSummaryTextDone;
 use OpenAI\Responses\StreamResponse;
 use Swis\Agents\Interfaces\AgentInterface;
+use Swis\Agents\Message;
 use Swis\Agents\Transporters\ResponsesTransporter;
 
 /**
@@ -37,10 +40,10 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
     /**
      * Extract text from the streamed response chunk.
      *
-     * @param OutputTextDelta $response
+     * @param OutputTextDelta|ReasoningSummaryTextDelta $response
      * @return string
      */
-    protected function getText(OutputTextDelta $response): string
+    protected function getText(OutputTextDelta|ReasoningSummaryTextDelta $response): string
     {
         return $response->delta;
     }
@@ -110,14 +113,29 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             assert($response instanceof CreateStreamedResponse);
             $this->generated[] = $response;
 
+            $context = $this->agent->orchestrator()->context;
+            $context->observerInvoker()->agentOnStreamEvent($context, $this->agent, $response->event, $response);
+
             if ($response->event === 'response.created' && $response->response instanceof CreateResponse) {
-                $this->agent->orchestrator()->context->withPreviousResponseId($response->response->id);
+                $context->withPreviousResponseId($response->response->id);
 
                 continue;
             }
 
             if ($response->response instanceof OutputItem) {
                 $currentItem = $response->response;
+            }
+
+            if ($response->response instanceof ReasoningSummaryTextDelta) {
+                $context->observerInvoker()->agentOnReasoningInterval($context, $this->agent, new Payload($this->getText($response->response), 'assistant'));
+
+                continue;
+            }
+
+            if ($response->response instanceof ReasoningSummaryTextDone) {
+                $context->observerInvoker()->agentOnReasoning($context, $this->agent, new Message('assistant', $response->response->text));
+
+                continue;
             }
 
             if ($response->response instanceof OutputTextDelta) {

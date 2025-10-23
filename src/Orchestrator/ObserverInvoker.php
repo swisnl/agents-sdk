@@ -2,6 +2,7 @@
 
 namespace Swis\Agents\Orchestrator;
 
+use OpenAI\Responses\Responses\CreateStreamedResponse;
 use Swis\Agents\Interfaces\AgentInterface;
 use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Response\Payload;
@@ -45,6 +46,52 @@ class ObserverInvoker
     {
         foreach ($context->agentObservers() as $observer) {
             $observer->onResponseInterval($agent, $payload, $context);
+        }
+    }
+
+    /**
+     * Notify all agent observers about a reasoning message
+     *
+     * @param RunContext $context The run context
+     * @param AgentInterface $agent The agent that generated the reasoning
+     * @param MessageInterface $message The reasoning message that was generated
+     * @return void
+     */
+    public function agentOnReasoning(RunContext $context, AgentInterface $agent, MessageInterface $message): void
+    {
+        foreach ($context->agentObservers() as $observer) {
+            $observer->onReasoning($agent, $message, $context);
+        }
+    }
+
+    /**
+     * Notify all agent observers about an intermediate reasoning token during streaming
+     *
+     * @param RunContext $context The run context
+     * @param AgentInterface $agent The agent that generated the reasoning token
+     * @param Payload $payload The reasoning token payload
+     * @return void
+     */
+    public function agentOnReasoningInterval(RunContext $context, AgentInterface $agent, Payload $payload): void
+    {
+        foreach ($context->agentObservers() as $observer) {
+            $observer->onReasoningInterval($agent, $payload, $context);
+        }
+    }
+
+    /**
+     * Notify all agent observers about an SSE event
+     *
+     * @param RunContext $context The run context
+     * @param AgentInterface $agent The agent that generated the reasoning token
+     * @param string $event The name of the event
+     * @param CreateStreamedResponse $response The response belonging to the event
+     * @return void
+     */
+    public function agentOnStreamEvent(RunContext $context, AgentInterface $agent, string $event, CreateStreamedResponse $response): void
+    {
+        foreach ($context->agentObservers() as $observer) {
+            $observer->onStreamEvent($agent, $event, $response, $context);
         }
     }
 

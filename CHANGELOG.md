@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.7.2 - 2025-10-23
+
+### What's Changed
+
+* Feat: Implement ToolExecutor abstraction by @jormeijer in https://github.com/swisnl/agents-sdk/pull/37
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.7.1...0.7.2
+
 ## 0.7.1 - 2025-10-23
 
 ### What's Changed

@@ -219,6 +219,7 @@ The SDK supports advanced MCP features:
 
 - Tool caching with PSR-6 compatible cache adapters
 - Process-based MCP clients for local tools
+- Metadata that can be sent with each MCP call
 
 Example with a local MCP server:
 
@@ -232,6 +233,9 @@ Example with a local MCP server:
 // Add caching support
 $mcpConnection->withCache($psr6CacheImplementation)
     ->withCacheTtl(1800); // 30 minute cache
+
+// Add metadata that will be sent with each MCP call
+$mcpConnection->withMeta(['traceparent' => '0000-0000-00-00x']);
 ```
 
 ## Multi-Agent Systems

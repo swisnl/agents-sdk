@@ -2,11 +2,13 @@
 
 namespace Swis\Agents\Mcp;
 
+use Closure;
 use Psr\Cache\CacheItemPoolInterface;
 use Swis\Agents\Exceptions\HandleToolException;
 use Swis\Agents\Interfaces\McpConnectionInterface;
 use Swis\Agents\Tool;
 use Swis\McpClient\Client;
+use Swis\McpClient\Requests\BaseRequest;
 use Swis\McpClient\Requests\CallToolRequest;
 use Swis\McpClient\Requests\ListToolsRequest;
 use Swis\McpClient\Results\CallToolResult;
@@ -41,6 +43,13 @@ class McpConnection implements McpConnectionInterface
      * @var int Cache lifetime in seconds (default: 1 hour)
      */
     protected int $cacheTtl = 3600;
+
+    /**
+     * The metadata that will be sent with each MCP request.
+     *
+     * @var array<string, mixed>|Closure
+     */
+    protected array|Closure $meta = [];
 
     /**
      * Constructor
@@ -182,6 +191,19 @@ class McpConnection implements McpConnectionInterface
     }
 
     /**
+     * Sets the metadata that will be sent with each MCP request
+     *
+     * @param array<string, mixed>|Closure $meta The metadata
+     * @return $this
+     */
+    public function withMeta(array|Closure $meta): self
+    {
+        $this->meta = $meta;
+
+        return $this;
+    }
+
+    /**
      * Connect to the MCP server
      */
     public function connect(): void
@@ -310,8 +332,9 @@ class McpConnection implements McpConnectionInterface
                 name: $tool->name(),
                 arguments: $tool->getDynamicPropertyValues()
             );
+            $this->addMetadata($request);
 
-            $result = $this->getClient()->callTool($request);
+            $result = $this->client->callTool($request);
 
             if ($result instanceof JsonRpcError) {
                 throw new HandleToolException($result->getMessage());
@@ -349,7 +372,10 @@ class McpConnection implements McpConnectionInterface
      */
     protected function fetchTools(): array
     {
-        $response = $this->client->listTools(new ListToolsRequest());
+        $request = new ListToolsRequest();
+        $this->addMetadata($request);
+
+        $response = $this->client->listTools($request);
 
         if ($response instanceof JsonRpcError) {
             throw new \RuntimeException("Error fetching tools: {$response->getMessage()}");
@@ -362,6 +388,23 @@ class McpConnection implements McpConnectionInterface
 
         return McpToolFactory::createTools($this, $tools);
 
+    }
+
+    /**
+     * Evaluate metadata and add to request
+     *
+     * @param BaseRequest $request
+     * @return void
+     */
+    protected function addMetadata(BaseRequest $request): void
+    {
+        if ($this->meta instanceof Closure) {
+            $metadata = ($this->meta)($request);
+        } else {
+            $metadata = $this->meta;
+        }
+
+        $request->withMeta($metadata);
     }
 
     /**

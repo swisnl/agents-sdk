@@ -7,6 +7,9 @@ use Swis\Agents\Exceptions\HandleToolException;
 use Swis\Agents\Mcp\McpConnection;
 use Swis\Agents\Mcp\McpTool;
 use Swis\McpClient\Client;
+use Swis\McpClient\Requests\BaseRequest;
+use Swis\McpClient\Requests\CallToolRequest;
+use Swis\McpClient\Requests\ListToolsRequest;
 use Swis\McpClient\Results\CallToolResult;
 use Swis\McpClient\Results\JsonRpcError;
 use Swis\McpClient\Results\ListToolsResult;
@@ -156,6 +159,43 @@ class McpConnectionTest extends TestCase
     }
 
     /**
+     * Test that metadata is added to list tools requests
+     */
+    public function testListToolsAddsMetadata(): void
+    {
+        // Create mock objects
+        $client = $this->createMock(Client::class);
+        $listToolsResult = $this->createMock(ListToolsResult::class);
+
+        // Configure mock behavior
+        $listToolsResult->method('getTools')
+            ->willReturn([]);
+
+        $expectedMeta = ['foo' => 'bar'];
+
+        $client->expects($this->once())
+            ->method('listTools')
+            ->with($this->callback(function (ListToolsRequest $request) use ($expectedMeta) {
+                $reflection = new \ReflectionProperty(BaseRequest::class, 'meta');
+                $reflection->setAccessible(true);
+
+                $this->assertSame($expectedMeta, $reflection->getValue($request));
+
+                return true;
+            }))
+            ->willReturn($listToolsResult);
+
+        // Create connection with metadata
+        $connection = new McpConnection($client, 'test-connection');
+        $connection->withMeta($expectedMeta);
+
+        // Test listing tools adds metadata
+        $tools = $connection->listTools(true);
+
+        $this->assertSame([], $tools);
+    }
+
+    /**
      * Test error when listing tools
      */
     public function testListToolsError(): void
@@ -254,6 +294,52 @@ class McpConnectionTest extends TestCase
         $this->expectExceptionMessage('Tool error message');
 
         $connection->callTool($tool);
+    }
+
+    /**
+     * Test that metadata from a closure is added to call tool requests
+     */
+    public function testCallToolAddsMetadataFromClosure(): void
+    {
+        // Create mock objects
+        $client = $this->createMock(Client::class);
+        $callToolResult = $this->createMock(CallToolResult::class);
+        $toolDefinition = $this->createMock(McpToolDefinition::class);
+
+        // Configure mock behavior
+        $callToolResult->method('getContent')
+            ->willReturn([]);
+
+        $toolDefinition->method('getName')->willReturn('metadata-tool');
+        $toolDefinition->method('getDescription')->willReturn('Metadata tool');
+        $toolDefinition->method('getSchema')->willReturn([]);
+
+        $client->expects($this->once())
+            ->method('callTool')
+            ->with($this->callback(function (CallToolRequest $request) {
+                $reflection = new \ReflectionProperty(BaseRequest::class, 'meta');
+                $reflection->setAccessible(true);
+
+                $this->assertSame(['method' => 'tools/call'], $reflection->getValue($request));
+
+                return true;
+            }))
+            ->willReturn($callToolResult);
+
+        // Create connection and configure metadata closure
+        $connection = new McpConnection($client, 'test-connection');
+        $connection->withMeta(static function (BaseRequest $request): array {
+            return [
+                'method' => $request->getMethod(),
+            ];
+        });
+
+        $tool = new McpTool($connection, $toolDefinition);
+
+        // Test calling the tool adds metadata
+        $result = $connection->callTool($tool);
+
+        $this->assertSame('', $result);
     }
 
     /**

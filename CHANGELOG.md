@@ -2,6 +2,15 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.9.0 - 2025-11-07
+
+### What's Changed
+
+* Add support for `_meta` parameter for MCP calls
+* build(deps): update openai-php/client requirement from ^0.13.0 || ^0.15.0 || ^0.17.0 to ^0.13.0 || ^0.15.0 || ^0.17.0 || ^0.18.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/40
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.8.1...0.9.0
+
 ## 0.8.1 - 2025-10-23
 
 ### What's Changed

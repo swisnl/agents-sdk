@@ -2,6 +2,16 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.9.1 - 2026-01-12
+
+### What's Changed
+
+* build(deps): bump actions/checkout from 5 to 6 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/41
+* build(deps): bump dependabot/fetch-metadata from 2.4.0 to 2.5.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/43
+* fix an issues with casting tool properties to objects without a class
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.9.0...0.9.1
+
 ## 0.9.0 - 2025-11-07
 
 ### What's Changed

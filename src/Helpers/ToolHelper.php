@@ -342,6 +342,10 @@ class ToolHelper
             return new $className();
         }
 
+        if ($className === \stdClass::class) {
+            return (object) $value;
+        }
+
         $object = new $className();
         $reflection = new \ReflectionClass($className);
 

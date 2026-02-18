@@ -70,11 +70,15 @@ class McpConnection implements McpConnectionInterface
      * Create a new MCP connection for a given Streamable HTTP endpoint
      *
      * @param string $endpoint
+     * @param array<string, string> $headers
      * @return self
      */
-    public static function forStreamableHttp(string $endpoint): self
+    public static function forStreamableHttp(string $endpoint, array $headers = []): self
     {
-        $client = Client::withStreamableHttp($endpoint);
+        $client = Client::withStreamableHttp(
+            endpoint: $endpoint,
+            headers: $headers,
+        );
 
         $connection = new self($client, 'MCP server');
         $connection->withCacheKey('mcp_tools_' . md5($endpoint));
@@ -86,11 +90,15 @@ class McpConnection implements McpConnectionInterface
      * Create a new MCP connection for a given SSE endpoint
      *
      * @param string $endpoint
+     * @param array<string, string> $headers
      * @return self
      */
-    public static function forSse(string $endpoint): self
+    public static function forSse(string $endpoint, array $headers = []): self
     {
-        $client = Client::withSse($endpoint);
+        $client = Client::withSse(
+            endpoint: $endpoint,
+            headers: $headers,
+        );
 
         $connection = new self($client, 'MCP server');
         $connection->withCacheKey('mcp_tools_' . md5($endpoint));

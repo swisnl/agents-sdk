@@ -2,6 +2,15 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.10.0 - 2026-02-18
+
+### What's Changed
+
+* build(deps-dev): update swisnl/mcp-client requirement from ^0.4 to ^0.4 || ^0.5 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/42
+* feat: Add support for passing along custom headers for MCP connections by @jormeijer in https://github.com/swisnl/agents-sdk/pull/45
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.9.1...0.10.0
+
 ## 0.9.1 - 2026-01-12
 
 ### What's Changed

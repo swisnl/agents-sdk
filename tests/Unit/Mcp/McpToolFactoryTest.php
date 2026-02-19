@@ -86,4 +86,52 @@ class McpToolFactoryTest extends TestCase
         $this->assertIsArray($tools);
         $this->assertEmpty($tools);
     }
+
+    /**
+     * Test creating tools with alternate names
+     */
+    public function testCreateToolsWithAlternateNames(): void
+    {
+        $connection = $this->createMock(McpConnection::class);
+        $mcpToolDefinition = $this->createMock(McpToolDefinition::class);
+
+        $mcpToolDefinition->method('getName')->willReturn('real-tool-name');
+        $mcpToolDefinition->method('getDescription')->willReturn('Real tool description');
+        $mcpToolDefinition->method('getSchema')->willReturn([]);
+
+        $tools = McpToolFactory::createTools(
+            $connection,
+            [$mcpToolDefinition],
+            ['real-tool-name' => 'alias-tool-name']
+        );
+
+        $this->assertCount(1, $tools);
+        $this->assertArrayHasKey('alias-tool-name', $tools);
+        $this->assertEquals('alias-tool-name', $tools['alias-tool-name']->name());
+        $this->assertEquals('real-tool-name', $tools['alias-tool-name']->mcpName());
+    }
+
+    /**
+     * Test creating tools with alternate descriptions
+     */
+    public function testCreateToolsWithAlternateDescriptions(): void
+    {
+        $connection = $this->createMock(McpConnection::class);
+        $mcpToolDefinition = $this->createMock(McpToolDefinition::class);
+
+        $mcpToolDefinition->method('getName')->willReturn('real-tool-name');
+        $mcpToolDefinition->method('getDescription')->willReturn('Original description');
+        $mcpToolDefinition->method('getSchema')->willReturn([]);
+
+        $tools = McpToolFactory::createTools(
+            $connection,
+            [$mcpToolDefinition],
+            [],
+            ['real-tool-name' => 'Agent-visible description']
+        );
+
+        $this->assertCount(1, $tools);
+        $this->assertArrayHasKey('real-tool-name', $tools);
+        $this->assertEquals('Agent-visible description', $tools['real-tool-name']->description());
+    }
 }

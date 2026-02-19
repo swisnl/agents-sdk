@@ -29,9 +29,45 @@ class McpToolTest extends TestCase
 
         // Test basic properties
         $this->assertEquals('test-tool', $tool->name());
+        $this->assertEquals('test-tool', $tool->mcpName());
         $this->assertEquals('Test tool description', $tool->description());
         $this->assertSame($connection, $tool->connection());
         $this->assertSame($mcpToolDefinition, $tool->mcpDefinition());
+    }
+
+    /**
+     * Test alternate tool names keep original MCP name
+     */
+    public function testAlternateToolName(): void
+    {
+        $connection = $this->createMock(McpConnection::class);
+        $mcpToolDefinition = $this->createMock(McpToolDefinition::class);
+
+        $mcpToolDefinition->method('getName')->willReturn('real-tool-name');
+        $mcpToolDefinition->method('getDescription')->willReturn('Test tool description');
+        $mcpToolDefinition->method('getSchema')->willReturn([]);
+
+        $tool = new McpTool($connection, $mcpToolDefinition, 'alias-tool-name');
+
+        $this->assertEquals('alias-tool-name', $tool->name());
+        $this->assertEquals('real-tool-name', $tool->mcpName());
+    }
+
+    /**
+     * Test alternate description is exposed to the agent
+     */
+    public function testAlternateToolDescription(): void
+    {
+        $connection = $this->createMock(McpConnection::class);
+        $mcpToolDefinition = $this->createMock(McpToolDefinition::class);
+
+        $mcpToolDefinition->method('getName')->willReturn('real-tool-name');
+        $mcpToolDefinition->method('getDescription')->willReturn('Original description');
+        $mcpToolDefinition->method('getSchema')->willReturn([]);
+
+        $tool = new McpTool($connection, $mcpToolDefinition, null, 'Agent-visible description');
+
+        $this->assertEquals('Agent-visible description', $tool->description());
     }
 
     /**

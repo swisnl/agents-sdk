@@ -22,12 +22,17 @@ class McpTool extends DynamicTool
      */
     public function __construct(
         protected McpConnection $connection,
-        protected McpToolDefinition $mcpToolDefinition
+        protected McpToolDefinition $mcpToolDefinition,
+        ?string $name = null,
+        ?string $description = null
     ) {
+        $toolName = $name ?? $mcpToolDefinition->getName();
+        $toolDescription = $description ?? $mcpToolDefinition->getDescription() ?? "MCP Tool: {$toolName}";
+
         // Initialize the tool with name and description from MCP
         parent::__construct(
-            $mcpToolDefinition->getName(),
-            $mcpToolDefinition->getDescription() ?? "MCP Tool: {$mcpToolDefinition->getName()}"
+            $toolName,
+            $toolDescription
         );
 
         // Register dynamic properties based on the MCP tool schema
@@ -42,6 +47,16 @@ class McpTool extends DynamicTool
     public function mcpDefinition(): McpToolDefinition
     {
         return $this->mcpToolDefinition;
+    }
+
+    /**
+     * Get the original MCP tool name.
+     *
+     * @return string
+     */
+    public function mcpName(): string
+    {
+        return $this->mcpToolDefinition->getName();
     }
 
     /**

@@ -159,6 +159,75 @@ class McpConnectionTest extends TestCase
     }
 
     /**
+     * Test listing tools with alternate names
+     */
+    public function testListToolsWithAlternateNames(): void
+    {
+        $client = $this->createMock(Client::class);
+        $listToolsResult = $this->createMock(ListToolsResult::class);
+        $toolDefinition1 = $this->createMock(McpToolDefinition::class);
+        $toolDefinition2 = $this->createMock(McpToolDefinition::class);
+
+        $toolDefinition1->method('getName')->willReturn('weather-tool');
+        $toolDefinition1->method('getDescription')->willReturn('Weather tool');
+        $toolDefinition1->method('getSchema')->willReturn([]);
+
+        $toolDefinition2->method('getName')->willReturn('calculator-tool');
+        $toolDefinition2->method('getDescription')->willReturn('Calculator tool');
+        $toolDefinition2->method('getSchema')->willReturn([]);
+
+        $listToolsResult->method('getTools')
+            ->willReturn([$toolDefinition1, $toolDefinition2]);
+
+        $client->method('listTools')
+            ->willReturn($listToolsResult);
+
+        $connection = new McpConnection($client, 'test-connection');
+        $connection->withAlternateToolNames([
+            'weather-tool' => 'weather',
+        ]);
+
+        $tools = $connection->listTools();
+
+        $this->assertCount(2, $tools);
+        $this->assertArrayHasKey('weather', $tools);
+        $this->assertArrayHasKey('calculator-tool', $tools);
+        $this->assertEquals('weather-tool', $tools['weather']->mcpName());
+        $this->assertEquals('calculator-tool', $tools['calculator-tool']->mcpName());
+    }
+
+    /**
+     * Test listing tools with alternate descriptions
+     */
+    public function testListToolsWithAlternateDescriptions(): void
+    {
+        $client = $this->createMock(Client::class);
+        $listToolsResult = $this->createMock(ListToolsResult::class);
+        $toolDefinition = $this->createMock(McpToolDefinition::class);
+
+        $toolDefinition->method('getName')->willReturn('weather-tool');
+        $toolDefinition->method('getDescription')->willReturn('Original weather description');
+        $toolDefinition->method('getSchema')->willReturn([]);
+
+        $listToolsResult->method('getTools')
+            ->willReturn([$toolDefinition]);
+
+        $client->method('listTools')
+            ->willReturn($listToolsResult);
+
+        $connection = new McpConnection($client, 'test-connection');
+        $connection->withAlternateToolDescriptions([
+            'weather-tool' => 'Agent-visible weather description',
+        ]);
+
+        $tools = $connection->listTools();
+
+        $this->assertCount(1, $tools);
+        $this->assertArrayHasKey('weather-tool', $tools);
+        $this->assertEquals('Agent-visible weather description', $tools['weather-tool']->description());
+    }
+
+    /**
      * Test that metadata is added to list tools requests
      */
     public function testListToolsAddsMetadata(): void
@@ -262,6 +331,52 @@ class McpConnectionTest extends TestCase
         $result = $connection->callTool($tool);
 
         $this->assertEquals('Tool result text', $result);
+    }
+
+    /**
+     * Test calling aliased tool uses the original MCP tool name
+     */
+    public function testCallToolWithAlternateNameUsesOriginalMcpName(): void
+    {
+        $client = $this->createMock(Client::class);
+        $listToolsResult = $this->createMock(ListToolsResult::class);
+        $mcpToolDefinition = $this->createMock(McpToolDefinition::class);
+        $callToolResult = $this->createMock(CallToolResult::class);
+
+        $mcpToolDefinition->method('getName')->willReturn('weather-tool');
+        $mcpToolDefinition->method('getDescription')->willReturn('Weather tool');
+        $mcpToolDefinition->method('getSchema')->willReturn([]);
+
+        $listToolsResult->method('getTools')
+            ->willReturn([$mcpToolDefinition]);
+
+        $callToolResult->method('getContent')
+            ->willReturn([]);
+
+        $client->method('listTools')
+            ->willReturn($listToolsResult);
+
+        $client->expects($this->once())
+            ->method('callTool')
+            ->with($this->callback(function (CallToolRequest $request) {
+                $reflection = new \ReflectionProperty(CallToolRequest::class, 'name');
+                $reflection->setAccessible(true);
+
+                $this->assertSame('weather-tool', $reflection->getValue($request));
+
+                return true;
+            }))
+            ->willReturn($callToolResult);
+
+        $connection = new McpConnection($client, 'test-connection');
+        $connection->withAlternateToolNames([
+            'weather-tool' => 'weather',
+        ]);
+
+        $tools = $connection->listTools();
+        $result = $connection->callTool($tools['weather']);
+
+        $this->assertSame('', $result);
     }
 
     /**

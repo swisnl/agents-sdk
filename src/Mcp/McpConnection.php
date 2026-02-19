@@ -30,6 +30,16 @@ class McpConnection implements McpConnectionInterface
     protected array $allowedToolNames = [];
 
     /**
+     * @var array<string, string> Map of MCP tool names to agent-visible tool names
+     */
+    protected array $alternateToolNames = [];
+
+    /**
+     * @var array<string, string> Map of MCP tool names to agent-visible tool descriptions
+     */
+    protected array $alternateToolDescriptions = [];
+
+    /**
      * @var array<McpTool>|null Cached tools from the MCP server
      */
     protected ?array $tools = null;
@@ -135,6 +145,32 @@ class McpConnection implements McpConnectionInterface
     public function withTools(string ...$toolNames): self
     {
         $this->allowedToolNames = array_merge($this->allowedToolNames, $toolNames);
+
+        return $this;
+    }
+
+    /**
+     * Define alternate names for MCP tools.
+     *
+     * @param array<string, string> $alternateToolNames Map of original MCP tool name => agent-visible tool name
+     * @return $this
+     */
+    public function withAlternateToolNames(array $alternateToolNames): self
+    {
+        $this->alternateToolNames = array_merge($this->alternateToolNames, $alternateToolNames);
+
+        return $this;
+    }
+
+    /**
+     * Define alternate descriptions for MCP tools.
+     *
+     * @param array<string, string> $alternateToolDescriptions Map of original MCP tool name => agent-visible tool description
+     * @return $this
+     */
+    public function withAlternateToolDescriptions(array $alternateToolDescriptions): self
+    {
+        $this->alternateToolDescriptions = array_merge($this->alternateToolDescriptions, $alternateToolDescriptions);
 
         return $this;
     }
@@ -337,7 +373,7 @@ class McpConnection implements McpConnectionInterface
 
         try {
             $request = new CallToolRequest(
-                name: $tool->name(),
+                name: $tool->mcpName(),
                 arguments: $tool->getDynamicPropertyValues()
             );
             $this->addMetadata($request);
@@ -394,7 +430,12 @@ class McpConnection implements McpConnectionInterface
             $tools = array_filter($tools, fn ($tool) => in_array($tool->getName(), $this->allowedToolNames));
         }
 
-        return McpToolFactory::createTools($this, $tools);
+        return McpToolFactory::createTools(
+            $this,
+            $tools,
+            $this->alternateToolNames,
+            $this->alternateToolDescriptions
+        );
 
     }
 

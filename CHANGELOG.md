@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.11.0 - 2026-02-19
+
+### What's Changed
+
+* Add MCP tool alias support for agent-visible names and descriptions by @jormeijer in https://github.com/swisnl/agents-sdk/pull/47
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.10.0...0.11.0
+
 ## 0.10.0 - 2026-02-18
 
 ### What's Changed

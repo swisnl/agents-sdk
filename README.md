@@ -205,6 +205,16 @@ $mcpConnection = McpConnection::forSse('http://localhost:3000');
 // Optionally restrict which tools are available
 $mcpConnection->withTools('calculator', 'weather');
 
+// Optionally expose MCP tools under alternate names for the agent
+$mcpConnection->withAlternateToolNames([
+    'get_current_weather' => 'weather',
+]);
+
+// Optionally expose MCP tools with alternate descriptions for the agent
+$mcpConnection->withAlternateToolDescriptions([
+    'get_current_weather' => 'Get current weather conditions by location.',
+]);
+
 // Create an agent with the MCP connection
 $agent = new Agent(
     name: 'Assistant with MCP Tools',

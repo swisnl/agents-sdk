@@ -36,6 +36,28 @@ interface McpConnectionInterface
     public function withTools(string ...$toolNames): self;
 
     /**
+     * Define alternate names for MCP tools.
+     *
+     * The array should map original MCP tool names to the names exposed
+     * to the agent.
+     *
+     * @param array<string, string> $alternateToolNames
+     * @return self
+     */
+    public function withAlternateToolNames(array $alternateToolNames): self;
+
+    /**
+     * Define alternate descriptions for MCP tools.
+     *
+     * The array should map original MCP tool names to the descriptions
+     * exposed to the agent.
+     *
+     * @param array<string, string> $alternateToolDescriptions
+     * @return self
+     */
+    public function withAlternateToolDescriptions(array $alternateToolDescriptions): self;
+
+    /**
      * List all tools available from this MCP connection
      *
      * @param bool $refresh Whether to refresh the cached tools

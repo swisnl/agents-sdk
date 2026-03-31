@@ -10,7 +10,7 @@ use Swis\Agents\Helpers\ToolHelper;
  * Tools are executable components that provide specific functionality to agents.
  * They can be invoked by agents to perform operations and return results.
  *
- * @phpstan-type ToolProperty array{type: string, description: string, required: bool, enum?: array<string>, itemsType?: string, objectClass?: string, schema?: array<string, mixed>}
+ * @phpstan-type ToolProperty array{type: string|array<string|null>, description: string, required: bool, enum?: array<string>, itemsType?: string, objectClass?: string, schema?: array<string, mixed>}
  */
 abstract class DynamicTool extends Tool
 {
@@ -50,7 +50,7 @@ abstract class DynamicTool extends Tool
      * Register a dynamic property with attributes
      *
      * @param string $name Property name
-     * @param string $type Property type
+     * @param string|array<string|null> $type Property type
      * @param string $description Property description
      * @param bool $required Whether the property is required
      * @param array<string>|null $enum Optional enum values
@@ -61,7 +61,7 @@ abstract class DynamicTool extends Tool
      */
     public function withDynamicProperty(
         string $name,
-        string $type,
+        string|array $type,
         string $description,
         bool $required = false,
         ?array $enum = null,

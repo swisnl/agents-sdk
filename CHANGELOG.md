@@ -2,6 +2,16 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.11.1 - 2026-03-31
+
+### What's Changed
+
+* build(deps-dev): update swisnl/mcp-client requirement from ^0.5.1 || ^0.6 to ^0.5.1 || ^0.6 || ^0.7 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/48
+* build(deps): bump dependabot/fetch-metadata from 2.5.0 to 3.0.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/49
+* Allow `type` in `DynamicTool` to support string or array type definitions by @jormeijer in https://github.com/swisnl/agents-sdk/pull/51
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.11.0...0.11.1
+
 ## 0.11.0 - 2026-02-19
 
 ### What's Changed

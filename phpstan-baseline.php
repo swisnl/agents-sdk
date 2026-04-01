@@ -140,6 +140,18 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/src/Orchestrator/RunContext.php',
 ];
 $ignoreErrors[] = [
+	'message' => '#^Instanceof between OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\CodeInterpreterCall\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\CodeInterpreterCodeDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\CodeInterpreterCodeDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ContentPart\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\Error\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\FileSearchCall\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\FunctionCallArgumentsDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\FunctionCallArgumentsDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ImageGenerationPart\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ImageGenerationPartialImage\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\McpCall\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\McpCallArgumentsDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\McpCallArgumentsDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\McpListTools\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\McpListToolsInProgress\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\OutputItem\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\OutputTextAnnotationAdded\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\OutputTextDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\OutputTextDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ReasoningSummaryPart\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ReasoningSummaryTextDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ReasoningSummaryTextDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ReasoningTextDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\ReasoningTextDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\RefusalDelta\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\RefusalDone\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\Response\\|OpenAI\\\\Responses\\\\Responses\\\\Streaming\\\\WebSearchCall and OpenAI\\\\Responses\\\\Responses\\\\CreateResponse will always evaluate to false\\.$#',
+	'identifier' => 'instanceof.alwaysFalse',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Response/ResponsesStreamedResponseWrapper.php',
+];
+$ignoreErrors[] = [
+	'message' => '#^Result of && is always false\\.$#',
+	'identifier' => 'booleanAnd.alwaysFalse',
+	'count' => 1,
+	'path' => __DIR__ . '/src/Response/ResponsesStreamedResponseWrapper.php',
+];
+$ignoreErrors[] = [
 	'message' => '#^Property Swis\\\\Agents\\\\Response\\\\StreamedResponseWrapper\\:\\:\\$capturedToolCalls type has no value type specified in iterable type array\\.$#',
 	'identifier' => 'missingType.iterableValue',
 	'count' => 1,

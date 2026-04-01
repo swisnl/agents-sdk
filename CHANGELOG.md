@@ -2,6 +2,14 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.12.0 - 2026-04-01
+
+### What's Changed
+
+* Update openai-php/client version requirement by @bbrala in https://github.com/swisnl/agents-sdk/pull/53
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.11.1...0.12.0
+
 ## 0.11.1 - 2026-03-31
 
 ### What's Changed

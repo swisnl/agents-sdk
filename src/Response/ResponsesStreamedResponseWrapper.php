@@ -116,7 +116,7 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             $context = $this->agent->orchestrator()->context;
             $context->observerInvoker()->agentOnStreamEvent($context, $this->agent, $response->event, $response);
 
-            // We need a codepath before and after 0.19, so let's check for the new response class.\
+            // We need a codepath before and after 0.19, so let's check for the new response class.
             $hasResponseClass = class_exists('\OpenAI\Responses\Responses\Streaming\Response');
 
             // openai-php/client < 0.19

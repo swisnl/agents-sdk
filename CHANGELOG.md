@@ -2,6 +2,19 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.20.0 - 2026-04-24
+
+### Breaking changes
+
+* Defaults to Stateless Response API instead of Stateful Response API.
+
+### What's Changed
+
+* build(deps): bump dependabot/fetch-metadata from 3.0.0 to 3.1.0 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/54
+* Feature/add support for stateless responses by @jormeijer in https://github.com/swisnl/agents-sdk/pull/55
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.12.0...0.20.0
+
 ## 0.12.0 - 2026-04-01
 
 ### What's Changed

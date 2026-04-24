@@ -6,14 +6,19 @@ use Generator;
 use IteratorAggregate;
 use OpenAI\Responses\Responses\CreateResponse;
 use OpenAI\Responses\Responses\CreateStreamedResponse;
+use OpenAI\Responses\Responses\Output\OutputFunctionToolCall;
+use OpenAI\Responses\Responses\Output\OutputMessage;
+use OpenAI\Responses\Responses\Output\OutputReasoning;
+use OpenAI\Responses\Responses\Output\OutputReasoningSummary;
 use OpenAI\Responses\Responses\Streaming\OutputItem;
 use OpenAI\Responses\Responses\Streaming\OutputTextDelta;
 use OpenAI\Responses\Responses\Streaming\ReasoningSummaryTextDelta;
 use OpenAI\Responses\Responses\Streaming\ReasoningSummaryTextDone;
 use OpenAI\Responses\StreamResponse;
 use Swis\Agents\Interfaces\AgentInterface;
+use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Message;
-use Swis\Agents\Transporters\ResponsesTransporter;
+use Swis\Agents\Transporters\BasesResponsesTransporter;
 
 /**
  * Basic streamed response wrapper for the Responses endpoint.
@@ -27,6 +32,14 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
     /** @var array<CreateStreamedResponse> */
     protected array $generated = [];
 
+    /** @var array<ReasoningItem> */
+    protected array $reasoningItems = [];
+
+    /**
+     * The id (msg_*) of the assistant message item being streamed, if any.
+     */
+    protected ?string $assistantItemId = null;
+
     /**
      * @param StreamResponse<CreateStreamedResponse> $response The streamed response from the API.
      * @param AgentInterface $agent The agent handling tool calls.
@@ -38,10 +51,26 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
     }
 
     /**
-     * Extract text from the streamed response chunk.
+     * Reasoning items captured from `response.output_item.done` events.
      *
-     * @param OutputTextDelta|ReasoningSummaryTextDelta $response
-     * @return string
+     * @return array<ReasoningItem>
+     */
+    public function reasoningItems(): array
+    {
+        return $this->reasoningItems;
+    }
+
+    /**
+     * The id (msg_*) of the assistant message item streamed during the response,
+     * or null when the response contained no assistant message.
+     */
+    public function assistantItemId(): ?string
+    {
+        return $this->assistantItemId;
+    }
+
+    /**
+     * Extract text from the streamed response chunk.
      */
     protected function getText(OutputTextDelta|ReasoningSummaryTextDelta $response): string
     {
@@ -62,7 +91,7 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             return false;
         }
 
-        if (! in_array($response->item->type, $this->applicableToolCallItemTypes())) {
+        if (! in_array($response->item->type, $this->applicableToolCallItemTypes(), true)) {
             return false;
         }
 
@@ -70,20 +99,15 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
     }
 
     /**
-     * Returns the list of item types that should be handled as Tool call
-     *
      * @return string[]
      */
     protected function applicableToolCallItemTypes(): array
     {
-        return (new ResponsesTransporter())->applicableToolCallItemTypes();
+        return BasesResponsesTransporter::TOOL_CALL_ITEM_TYPES;
     }
 
     /**
-     * Capture Tool call from the response output item.
-     *
-     * @param OutputItem $response
-     * @return ToolCall
+     * Capture a Tool call from the response output item.
      */
     protected function captureToolCall(OutputItem $response): ToolCall
     {
@@ -91,6 +115,7 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             tool: $response->item->name ?? $response->item->type,
             id: $response->item->callId ?? $response->item->id,
             argumentsPayload: $response->item->arguments ?? null,
+            itemId: $response->item->id ?? null,
         );
     }
 
@@ -137,6 +162,15 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
                 $currentItem = $response->response;
             }
 
+            if ($response->event === 'response.output_item.done' && $response->response instanceof OutputItem) {
+                match (get_class($response->response->item)) {
+                    OutputMessage::class => $context->addMessage($this->messageFromOutputMessage($response->response->item), $this->agent),
+                    OutputReasoning::class => $context->addMessage($this->messageFromOutputReasoning($response->response->item), $this->agent),
+                    OutputFunctionToolCall::class => null, // ToolCall messages are added to the context by the ToolExecutor.
+                    default => null,
+                };
+            }
+
             if ($response->response instanceof ReasoningSummaryTextDelta) {
                 $context->observerInvoker()->agentOnReasoningInterval($context, $this->agent, new Payload($this->getText($response->response), 'assistant'));
 
@@ -150,7 +184,11 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             }
 
             if ($response->response instanceof OutputTextDelta) {
-                yield new Payload(content: $this->getText($response->response), role: $currentItem?->item->role ?? null);
+                yield new Payload(
+                    content: $this->getText($response->response),
+                    role: $currentItem?->item->role ?? null,
+                    itemId: $currentItem?->item->id ?? null,
+                );
 
                 continue;
             }
@@ -170,5 +208,27 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
         }
 
         $this->isFinished = true;
+    }
+
+    protected function messageFromOutputMessage(OutputMessage $item): MessageInterface
+    {
+        $content = array_values($item->content)[0] ?? null;
+
+        return new Message(
+            role: $item->role,
+            content: $content->text ?? null,
+            itemId: $item->id,
+        );
+    }
+
+    protected function messageFromOutputReasoning(OutputReasoning $item): MessageInterface
+    {
+        $summary = array_map(fn (OutputReasoningSummary $summaryItem) => $summaryItem->toArray(), $item->summary);
+
+        return new ReasoningItem(
+            id: $item->id,
+            encryptedContent: $item->encryptedContent,
+            summary: $summary,
+        );
     }
 }

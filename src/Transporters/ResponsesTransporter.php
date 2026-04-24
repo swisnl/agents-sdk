@@ -3,45 +3,25 @@
 namespace Swis\Agents\Transporters;
 
 use OpenAI\Responses\Responses\CreateResponse;
-use OpenAI\Responses\Responses\Output\OutputMessage;
-use OpenAI\Responses\Responses\Output\OutputMessageContentOutputText;
 use Swis\Agents\Agent;
-use Swis\Agents\Helpers\ToolHelper;
 use Swis\Agents\Interfaces\MessageInterface;
-use Swis\Agents\Interfaces\Transporter;
-use Swis\Agents\Message;
 use Swis\Agents\Orchestrator\RunContext;
-use Swis\Agents\Response\Payload;
-use Swis\Agents\Response\ResponsesStreamedResponseWrapper;
-use Swis\Agents\Response\ToolCall;
-use Swis\Agents\Tool;
-use Swis\Agents\Tool\ToolOutput;
 
 /**
- * Transporter implementation that uses the Responses API.
+ * Transporter implementation that uses the Responses API in stateless mode.
+ *
+ * Instead of relying on `previous_response_id`, this transporter replays the full
+ * conversation (including encrypted reasoning items) on every turn. It asks the
+ * API for `reasoning.encrypted_content` so prior reasoning can be carried between
+ * turns without any server-side state.
+ *
+ * This is the default transporter because it works for ZDR-compliant organisations
+ * and conversations that outlive the server-side retention window.
  */
-class ResponsesTransporter implements Transporter
+class ResponsesTransporter extends BasesResponsesTransporter
 {
     /**
-     * Invoke the Responses endpoint for the given agent and context.
-     */
-    public function invoke(Agent $agent, RunContext $context): void
-    {
-        $payload = $this->buildRequestPayload($agent, $context);
-        $context->startNewRun();
-
-        if ($context->isStreamed()) {
-            $this->invokeStreamed($agent, $context, $payload);
-        } else {
-            $this->invokeDirect($agent, $context, $payload);
-        }
-    }
-
-    /**
      * Build the request payload for the Responses API.
-     *
-     * @param Agent $agent
-     * @param RunContext $context
      *
      * @return array<string,mixed>
      */
@@ -53,7 +33,8 @@ class ResponsesTransporter implements Transporter
             'model' => $modelSettings->modelName,
             'temperature' => $modelSettings->temperature,
             'max_output_tokens' => $modelSettings->maxTokens,
-            'previous_response_id' => $context->previousResponseId(),
+            'store' => false,
+            'include' => ['reasoning.encrypted_content'],
             'input' => $this->buildInputs($agent, $context),
             ...$modelSettings->extraOptions ?? [],
         ];
@@ -67,10 +48,16 @@ class ResponsesTransporter implements Transporter
     }
 
     /**
-     * Build the inputs for the request payload
+     * Build the inputs for the request payload.
      *
-     * @param Agent $agent
-     * @param RunContext $context
+     * Emits every item in the conversation in chronological order. Each item's
+     * `jsonSerialize()` already returns a Responses API input-item shape:
+     * - Plain messages (system/user/developer) → `{role, content}`
+     * - Assistant messages with a msg_* itemId → `{type:'message', id, role:'assistant', content:[{type:'output_text', text}]}`
+     * - ReasoningItem → `{type:'reasoning', id, encrypted_content, summary}`
+     * - ToolCall → `{type:'function_call', id?, call_id, name, arguments}`
+     * - ToolOutput → `{type:'function_call_output', call_id, output}`
+     *
      * @return array<MessageInterface>
      */
     protected function buildInputs(Agent $agent, RunContext $context): array
@@ -78,239 +65,18 @@ class ResponsesTransporter implements Transporter
         $instruction = $agent->prepareInstruction();
         $context->withSystemMessage($instruction);
 
-        $allowedRolesForInput = [
-            Message::ROLE_SYSTEM,
-            Message::ROLE_DEVELOPER,
-        ];
-
-        $inputs = array_filter($context->conversation(), fn (MessageInterface $message) => in_array($message->role(), $allowedRolesForInput));
-        $inputs = $this->appendToolOutputsToInputs($inputs, $context);
-
-        return $this->appendLastMessageToInputs($inputs, $context);
+        return array_values($context->conversation());
     }
 
     /**
-     * Append the toolOutputs for the current run
-     *
-     * @param array<MessageInterface> $inputs
-     * @param RunContext $context
-     * @return array<MessageInterface>
+     * In stateless mode we do not store `previous_response_id` – every turn is
+     * self-contained. We do, however, capture the reasoning items so the next
+     * turn can replay them.
      */
-    protected function appendToolOutputsToInputs(array $inputs, RunContext $context): array
+    protected function captureResponseMetadata(Agent $agent, RunContext $context, CreateResponse $response): void
     {
-        foreach ($context->toolOutputsForCurrentRun() as $toolOutput) {
-            $inputs[] = $toolOutput;
+        foreach ($this->reasoningItemsFromResponse($response) as $reasoningItem) {
+            $context->addMessage($reasoningItem, $agent);
         }
-
-        return $inputs;
-    }
-
-    /**
-     * Append the last message to the input, only when valid for input
-     *
-     * @param array<MessageInterface> $inputs
-     * @param RunContext $context
-     * @return array<MessageInterface>
-     */
-    protected function appendLastMessageToInputs(array $inputs, RunContext $context): array
-    {
-        $lastMessage = $context->lastMessage();
-
-        if ($lastMessage === null) {
-            return $inputs;
-        }
-
-        if ($lastMessage->role() === Message::ROLE_USER) {
-            $inputs[] = $lastMessage;
-
-            return $inputs;
-        }
-
-        if ($lastMessage instanceof ToolOutput) {
-            $inputs[] = $lastMessage;
-
-            return $inputs;
-        }
-
-        return $inputs;
-    }
-
-    /**
-     * Transform tools into the payload structure expected by the API.
-     *
-     * @param array<Tool> $tools
-     *
-     * @return array<int, array<string,mixed>>
-     */
-    protected function buildToolsPayload(array $tools): array
-    {
-        return array_values(array_map(fn (Tool $tool) => $this->toolToPayload($tool), $tools));
-    }
-
-    /**
-     * Convert a single tool into its payload representation.
-     *
-     * @param Tool $tool
-     * @return array<string, mixed>
-     */
-    protected function toolToPayload(Tool $tool): array
-    {
-        return [
-            'type' => 'function',
-            ...ToolHelper::toolToDefinition($tool),
-        ];
-    }
-
-    /**
-     * Handle a non-streamed Responses request.
-     *
-     * @param Agent $agent
-     * @param RunContext $context
-     * @param array<string,mixed> $payload
-     */
-    protected function invokeDirect(Agent $agent, RunContext $context, array $payload): void
-    {
-        $response = $context->client()->responses()->create($payload);
-        $this->handleResponse($agent, $context, $response);
-    }
-
-    /**
-     * Handle a streamed Responses request.
-     *
-     * @param Agent $agent
-     * @param RunContext $context
-     * @param array<string,mixed> $payload
-     */
-    protected function invokeStreamed(Agent $agent, RunContext $context, array $payload): void
-    {
-        $response = $context->client()->responses()->createStreamed($payload);
-        $streamedResponse = new ResponsesStreamedResponseWrapper($response, $agent);
-
-        $message = '';
-        $lastPayload = null;
-
-        foreach ($streamedResponse as $responsePayload) {
-            $context->observerInvoker()->agentOnResponseInterval($context, $agent, $responsePayload);
-            if (isset($responsePayload->content)) {
-                $message .= $responsePayload->content;
-            }
-            $lastPayload = $responsePayload;
-        }
-
-        if (! empty($message) && isset($lastPayload)) {
-            $lastPayload->content = $message;
-            $context->addAgentMessage($lastPayload, $agent);
-            if ($context->lastMessage() !== null) {
-                $context->observerInvoker()->agentOnResponse($context, $agent, $context->lastMessage());
-            }
-        }
-    }
-
-    /**
-     * Process a non-streamed API response.
-     */
-    protected function handleResponse(Agent $agent, RunContext $context, CreateResponse $response): void
-    {
-        $context->withPreviousResponseId($response->id);
-
-        if ($this->isToolCall($response)) {
-            $this->handleToolCallResponse($agent, $response);
-
-            return;
-        }
-
-        $content = '';
-        $role = null;
-        foreach ($response->output as $item) {
-            if (! $item instanceof OutputMessage) {
-                continue;
-            }
-
-            $contents = array_filter($item->content, fn ($content) => $content instanceof OutputMessageContentOutputText);
-            $contents = array_map(fn ($content) => $content->text, $contents);
-
-            $content .= implode($contents);
-            $role = $item->role;
-        }
-
-        $payload = new Payload(
-            content: $content,
-            role: $role,
-            choice: 0,
-            inputTokens: $response->usage?->inputTokens,
-            outputTokens: $response->usage?->outputTokens,
-        );
-
-        $context->observerInvoker()->agentOnResponseInterval($context, $agent, $payload);
-        $context->addAgentMessage($payload, $agent);
-        if ($context->lastMessage() !== null) {
-            $context->observerInvoker()->agentOnResponse($context, $agent, $context->lastMessage());
-        }
-    }
-
-    /**
-     * Handle responses that contain tool calls.
-     */
-    protected function handleToolCallResponse(Agent $agent, CreateResponse $response): void
-    {
-        $toolCalls = $this->toolCallsFromResponse($response);
-        $agent->executeTools($toolCalls);
-    }
-
-    /**
-     * Determine if the response contains tool calls.
-     */
-    protected function isToolCall(CreateResponse $response): bool
-    {
-        $applicableToolCallItemTypes = $this->applicableToolCallItemTypes();
-
-        foreach ($response->output as $item) {
-            if (in_array($item->type, $applicableToolCallItemTypes)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns the list of item types that should be handled as Tool call
-     *
-     * @return string[]
-     */
-    public function applicableToolCallItemTypes(): array
-    {
-        return [
-            'file_search_call',
-            'function_call',
-            'web_search_call',
-            'computer_call',
-            'code_interpreter_call',
-        ];
-    }
-
-    /**
-     * Extract tool calls from the response.
-     *
-     * @return array<ToolCall>
-     */
-    protected function toolCallsFromResponse(CreateResponse $response): array
-    {
-        $applicableToolCallItemTypes = $this->applicableToolCallItemTypes();
-
-        $toolCalls = [];
-        foreach ($response->output as $item) {
-            if (! in_array($item->type, $applicableToolCallItemTypes)) {
-                continue;
-            }
-
-            $toolCalls[] = new ToolCall(
-                tool: $item->name ?? $item->type,
-                id: $item->callId ?? $item->id,
-                argumentsPayload: $item->arguments ?? null,
-            );
-        }
-
-        return $toolCalls;
     }
 }

@@ -96,4 +96,43 @@ class MessageTest extends TestCase
 
         $this->assertEquals('', (string) $nullContentMessage);
     }
+
+    /**
+     * An assistant message with an itemId serialises to the Responses API
+     * input-item shape, so it can be replayed in stateless mode.
+     */
+    public function testAssistantMessageWithItemIdSerialisesAsResponsesInputItem(): void
+    {
+        $message = new Message(
+            role: Message::ROLE_ASSISTANT,
+            content: 'Hello there',
+            itemId: 'msg_abc123',
+        );
+
+        $json = $message->jsonSerialize();
+
+        $this->assertSame('message', $json['type']);
+        $this->assertSame('msg_abc123', $json['id']);
+        $this->assertSame(Message::ROLE_ASSISTANT, $json['role']);
+        $this->assertSame([[ 'type' => 'output_text', 'text' => 'Hello there' ]], $json['content']);
+    }
+
+    /**
+     * Without an itemId, assistant messages keep the legacy jsonSerialize shape
+     * so the Chat Completions transporter is unaffected.
+     */
+    public function testAssistantMessageWithoutItemIdKeepsLegacyShape(): void
+    {
+        $message = new Message(
+            role: Message::ROLE_ASSISTANT,
+            content: 'Hello there',
+        );
+
+        $json = $message->jsonSerialize();
+
+        $this->assertArrayNotHasKey('type', $json);
+        $this->assertArrayNotHasKey('id', $json);
+        $this->assertSame(Message::ROLE_ASSISTANT, $json['role']);
+        $this->assertSame('Hello there', $json['content']);
+    }
 }

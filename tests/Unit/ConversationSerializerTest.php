@@ -7,6 +7,9 @@ use Swis\Agents\Agent;
 use Swis\Agents\Helpers\ConversationSerializer;
 use Swis\Agents\Message;
 use Swis\Agents\Orchestrator\RunContext;
+use Swis\Agents\Response\ReasoningItem;
+use Swis\Agents\Response\ToolCall;
+use Swis\Agents\Tool\ToolOutput;
 
 class ConversationSerializerTest extends TestCase
 {
@@ -95,5 +98,79 @@ class ConversationSerializerTest extends TestCase
         $this->assertEquals('Hi there', $messages[2]->content());
         $this->assertEquals(10, $messages[2]->usage()['input_tokens']);
         $this->assertEquals(5, $messages[2]->usage()['output_tokens']);
+    }
+
+    public function testReasoningItemRoundTrip(): void
+    {
+        $context = new RunContext();
+        $context->addMessage(new ReasoningItem(
+            id: 'rs_1',
+            encryptedContent: 'BLOB',
+            summary: [['type' => 'summary_text', 'text' => 'thinking...']],
+        ));
+
+        $serialized = ConversationSerializer::serialize($context);
+
+        $this->assertSame('reasoning', $serialized['conversation'][0]['type']);
+        $this->assertSame('rs_1', $serialized['conversation'][0]['id']);
+        $this->assertSame('BLOB', $serialized['conversation'][0]['encrypted_content']);
+
+        $restored = ConversationSerializer::deserialize($serialized);
+        $messages = $restored->conversation();
+
+        $this->assertInstanceOf(ReasoningItem::class, $messages[0]);
+        $this->assertSame('rs_1', $messages[0]->id);
+        $this->assertSame('BLOB', $messages[0]->encryptedContent);
+        $this->assertSame([['type' => 'summary_text', 'text' => 'thinking...']], $messages[0]->summary);
+    }
+
+    public function testToolCallRoundTripPreservesItemId(): void
+    {
+        $context = new RunContext();
+        $context->addMessage(new ToolCall(
+            tool: 'get_weather',
+            id: 'call_1',
+            argumentsPayload: '{"city":"Leiden"}',
+            itemId: 'fc_1',
+        ));
+        $context->addMessage(new ToolOutput('Sunny', 'call_1'));
+
+        $serialized = ConversationSerializer::serialize($context);
+
+        $this->assertSame('tool_call', $serialized['conversation'][0]['type']);
+        $this->assertSame('fc_1', $serialized['conversation'][0]['item_id']);
+        $this->assertSame('tool_output', $serialized['conversation'][1]['type']);
+        $this->assertSame('call_1', $serialized['conversation'][1]['call_id']);
+
+        $restored = ConversationSerializer::deserialize($serialized);
+        $messages = $restored->conversation();
+
+        $this->assertInstanceOf(ToolCall::class, $messages[0]);
+        $this->assertSame('get_weather', $messages[0]->tool);
+        $this->assertSame('call_1', $messages[0]->id);
+        $this->assertSame('fc_1', $messages[0]->itemId());
+        $this->assertSame('{"city":"Leiden"}', $messages[0]->argumentsPayload);
+
+        $this->assertInstanceOf(ToolOutput::class, $messages[1]);
+        $this->assertSame('Sunny', $messages[1]->content());
+    }
+
+    public function testAssistantMessageRoundTripPreservesItemId(): void
+    {
+        $context = new RunContext();
+        $context->addMessage(new Message(
+            role: Message::ROLE_ASSISTANT,
+            content: 'Hello there',
+            itemId: 'msg_abc',
+        ));
+
+        $serialized = ConversationSerializer::serialize($context);
+        $this->assertSame('msg_abc', $serialized['conversation'][0]['item_id']);
+
+        $restored = ConversationSerializer::deserialize($serialized);
+        $messages = $restored->conversation();
+
+        $this->assertSame('msg_abc', $messages[0]->itemId());
+        $this->assertSame('Hello there', $messages[0]->content());
     }
 }

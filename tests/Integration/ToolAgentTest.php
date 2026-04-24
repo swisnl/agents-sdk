@@ -3,6 +3,7 @@
 namespace Swis\Agents\Tests\Integration;
 
 use Swis\Agents\Agent;
+use Swis\Agents\Response\ReasoningItem;
 use Swis\Agents\Response\ToolCall;
 use Swis\Agents\Tool;
 use Swis\Agents\Tool\Required;
@@ -19,7 +20,25 @@ class ToolAgentTest extends BaseOrchestratorTestCase
             tools: [$this->weatherTool()]
         );
 
-        $this->runAgentTest($agent);
+        $response = $this->orchestrator
+            ->withUserInstruction('What is the current weather in Boston, MA?')
+            ->run($agent);
+
+        $conversation = $this->orchestrator->context->conversation();
+
+        $this->assertInstanceOf(ReasoningItem::class, $conversation[2]);
+
+        $this->assertInstanceOf(ToolCall::class, $conversation[3]);
+        $this->assertArrayHasKey('location', $conversation[3]->arguments);
+        $this->assertEquals('Boston, MA', $conversation[3]->arguments['location']);
+
+        $this->assertInstanceOf(ToolOutput::class, $conversation[4]);
+        $this->assertEquals('tool', $conversation[4]->role());
+        $this->assertEquals('It is currently 20 degrees in Boston, MA', $conversation[4]->content());
+        $this->assertArrayHasKey('call_id', $conversation[4]->jsonSerialize());
+        $this->assertEquals('call_trlgKnhMpYSC7CFXKw3CceUZ', $conversation[4]->jsonSerialize()['call_id']);
+
+        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $response->content());
     }
 
     public function testToolAgentInteractionWithChatCompletions()
@@ -30,27 +49,23 @@ class ToolAgentTest extends BaseOrchestratorTestCase
             transporter: new ChatCompletionTransporter()
         );
 
-        $this->runAgentTest($agent);
-    }
-
-    protected function runAgentTest(Agent $agent)
-    {
         $response = $this->orchestrator
             ->withUserInstruction('What is the current weather in Boston, MA?')
             ->run($agent);
 
-        $this->assertInstanceOf(ToolCall::class, $this->orchestrator->context->conversation()[2]);
-        $this->assertArrayHasKey('location', $this->orchestrator->context->conversation()[2]->arguments);
-        $this->assertEquals('Boston, MA', $this->orchestrator->context->conversation()[2]->arguments['location']);
+        $conversation = $this->orchestrator->context->conversation();
 
-        $this->assertInstanceOf(ToolOutput::class, $this->orchestrator->context->conversation()[3]);
-        $this->assertEquals('tool', $this->orchestrator->context->conversation()[3]->role());
-        $this->assertEquals('It is currently 20 degrees in Boston, MA', $this->orchestrator->context->conversation()[3]->content());
-        $this->assertArrayHasKey('call_id', $this->orchestrator->context->conversation()[3]->jsonSerialize());
-        $this->assertEquals('call_trlgKnhMpYSC7CFXKw3CceUZ', $this->orchestrator->context->conversation()[3]->jsonSerialize()['call_id']);
+        $this->assertInstanceOf(ToolCall::class, $conversation[2]);
+        $this->assertArrayHasKey('location', $conversation[2]->arguments);
+        $this->assertEquals('Boston, MA', $conversation[2]->arguments['location']);
+
+        $this->assertInstanceOf(ToolOutput::class, $conversation[3]);
+        $this->assertEquals('tool', $conversation[3]->role());
+        $this->assertEquals('It is currently 20 degrees in Boston, MA', $conversation[3]->content());
+        $this->assertArrayHasKey('call_id', $conversation[3]->jsonSerialize());
+        $this->assertEquals('call_trlgKnhMpYSC7CFXKw3CceUZ', $conversation[3]->jsonSerialize()['call_id']);
 
         $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $response->content());
-
     }
 
     protected function weatherTool(): Tool

@@ -3,7 +3,9 @@
 namespace Swis\Agents\Tests\Integration;
 
 use Swis\Agents\Agent;
+use Swis\Agents\Interfaces\OwnableMessageInterface;
 use Swis\Agents\Response\Payload;
+use Swis\Agents\Response\ReasoningItem;
 use Swis\Agents\Tool;
 use Swis\Agents\Tool\Required;
 use Swis\Agents\Tool\ToolParameter;
@@ -18,7 +20,24 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
             tools: [$this->weatherTool()]
         );
 
-        $this->runAgentTest($agent);
+        $response = $this->runAgentTest($agent);
+
+        $conversation = $this->orchestrator->context->conversation();
+
+        $this->assertInstanceOf(ReasoningItem::class, $conversation[2]);
+
+        $this->assertArrayHasKey('location', $conversation[3]->arguments);
+        $this->assertEquals('Boston, MA', $conversation[3]->arguments['location']);
+
+        $this->assertEquals('tool', $conversation[4]->role());
+        $this->assertEquals('It is currently 20 degrees in Boston, MA', $conversation[4]->content());
+
+        $this->assertEquals('assistant', $conversation[5]->role());
+        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $conversation[5]->content());
+
+        // Verify final response
+        $this->assertSame($agent, $response->owner());
+        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $response->content());
     }
 
     public function testStreamToolAgentInteractionWithChatCompletions()
@@ -29,10 +48,25 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
             transporter: new ChatCompletionTransporter()
         );
 
-        $this->runAgentTest($agent);
+        $response = $this->runAgentTest($agent);
+
+        $conversation = $this->orchestrator->context->conversation();
+
+        $this->assertArrayHasKey('location', $conversation[2]->arguments);
+        $this->assertEquals('Boston, MA', $conversation[2]->arguments['location']);
+
+        $this->assertEquals('tool', $conversation[3]->role());
+        $this->assertEquals('It is currently 20 degrees in Boston, MA', $conversation[3]->content());
+
+        $this->assertEquals('assistant', $conversation[4]->role());
+        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $conversation[4]->content());
+
+        // Verify final response
+        $this->assertSame($agent, $response->owner());
+        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $response->content());
     }
 
-    protected function runAgentTest(Agent $agent)
+    protected function runAgentTest(Agent $agent): OwnableMessageInterface
     {
         $tokens = 0;
         $response = $this->orchestrator
@@ -43,6 +77,8 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
                 }
                 $tokens++;
             });
+
+        $this->assertInstanceOf(OwnableMessageInterface::class, $response);
 
         // Verify tokens were streamed in the final response
         $this->assertGreaterThan(0, $tokens);
@@ -57,22 +93,7 @@ class StreamToolAgentTest extends BaseOrchestratorTestCase
         $this->assertEquals('user', $conversation[1]->role());
         $this->assertEquals('What is the current weather in Boston, MA?', $conversation[1]->content());
 
-        // Third message should be the tool call
-        $this->assertArrayHasKey('location', $conversation[2]->arguments);
-        $this->assertEquals('Boston, MA', $conversation[2]->arguments['location']);
-
-        // Fourth message should be the tool output
-        $this->assertEquals('tool', $conversation[3]->role());
-        $this->assertEquals('It is currently 20 degrees in Boston, MA', $conversation[3]->content());
-
-        // Fifth message should be the final response
-        $this->assertEquals('assistant', $conversation[4]->role());
-        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $conversation[4]->content());
-
-        // Verify final response
-        $this->assertSame($agent, $response->owner());
-        $this->assertEquals('It\'s 20 degrees in Boston, MA right now.', $response->content());
-
+        return $response;
     }
 
     protected function weatherTool(): Tool

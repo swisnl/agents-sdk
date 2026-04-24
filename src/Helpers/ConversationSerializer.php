@@ -2,16 +2,36 @@
 
 namespace Swis\Agents\Helpers;
 
+use Swis\Agents\Interfaces\MessageInterface;
 use Swis\Agents\Message;
 use Swis\Agents\Orchestrator;
 use Swis\Agents\Orchestrator\RunContext;
+use Swis\Agents\Response\ReasoningItem;
+use Swis\Agents\Response\ToolCall;
+use Swis\Agents\Tool\ToolOutput;
 
 /**
  * Helper class to serialize and deserialize conversation state
  * for continuing conversations at a later time.
+ *
+ * Serialization itself lives on each message class (via toSerializedArray()
+ * and fromSerializedArray()); this helper only orchestrates the loop and
+ * maps the serialized `type` back to the right class.
  */
 class ConversationSerializer
 {
+    /**
+     * Map of serialized `type` values to the class that can rehydrate them.
+     * Entries without a `type` (plain Message) fall through to Message.
+     *
+     * @var array<string, class-string<MessageInterface>>
+     */
+    protected const TYPE_MAP = [
+        'reasoning' => ReasoningItem::class,
+        'tool_call' => ToolCall::class,
+        'tool_output' => ToolOutput::class,
+    ];
+
     /**
      * Serialize the conversation from a RunContext into a portable format
      *
@@ -22,27 +42,17 @@ class ConversationSerializer
     {
         $serializedMessages = [];
         foreach ($context->conversation() as $message) {
-            $serializedMessages[] = [
-                'role' => $message->role(),
-                'content' => $message->content(),
-                'parameters' => $message->parameters(),
-                'usage' => $message->usage(),
-                // We don't serialize the owner as it would be complex to recreate
-                // the exact agent instances. We don't need owner information to
-                // continue the conversation at a later time.
-            ];
+            $serializedMessages[] = $message->toSerializedArray();
         }
 
-        $serialized = [
+        return [
             'conversation' => $serializedMessages,
             'previous_response_id' => $context->previousResponseId(),
             'metadata' => [
                 'serialized_at' => time(),
-                'version' => '1.0',
+                'version' => '1.1',
             ],
         ];
-
-        return $serialized;
     }
 
     public static function serializeFromOrchestrator(Orchestrator $orchestrator): array
@@ -61,19 +71,21 @@ class ConversationSerializer
     {
         $context = $into ?? new RunContext();
 
-        // Restore all messages
         foreach ($data['conversation'] as $messageData) {
-            $message = new Message(
-                role: $messageData['role'],
-                content: $messageData['content'],
-                parameters: $messageData['parameters'] ?? [],
-                inputTokens: $messageData['usage']['input_tokens'] ?? null,
-                outputTokens: $messageData['usage']['output_tokens'] ?? null
-            );
-
+            $message = self::deserializeMessage($messageData);
             $context->addMessage($message);
         }
 
         return $context->withPreviousResponseId($data['previous_response_id'] ?? null);
+    }
+
+    /**
+     * @param array<string, mixed> $messageData
+     */
+    protected static function deserializeMessage(array $messageData): MessageInterface
+    {
+        $class = self::TYPE_MAP[$messageData['type'] ?? ''] ?? Message::class;
+
+        return $class::fromSerializedArray($messageData);
     }
 }

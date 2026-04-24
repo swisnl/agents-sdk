@@ -18,11 +18,12 @@ class Message implements OwnableMessageInterface, JsonSerializable
     /**
      * Standard role constants for different message types.
      */
-    public const ROLE_SYSTEM = 'system';       // System instructions or context
-    public const ROLE_DEVELOPER = 'developer'; // System instructions or context
-    public const ROLE_ASSISTANT = 'assistant'; // AI-generated responses
-    public const ROLE_USER = 'user';           // Human/user inputs
-    public const ROLE_TOOL = 'tool';           // Tool execution results
+    public const ROLE_SYSTEM = 'system';
+    public const ROLE_DEVELOPER = 'developer';
+    public const ROLE_ASSISTANT = 'assistant';
+    public const ROLE_USER = 'user';
+    public const ROLE_TOOL = 'tool';
+    public const ROLE_REASONING = 'reasoning';
 
     /**
      * The agent that initiated this message, if applicable.
@@ -37,6 +38,8 @@ class Message implements OwnableMessageInterface, JsonSerializable
      * @param array<string, mixed> $parameters      Additional parameters specific to message type
      * @param int|null $inputTokens  Number of tokens in input processing, for usage tracking
      * @param int|null $outputTokens Number of tokens in output generation, for usage tracking
+     * @param string|null $itemId    Optional Responses API item id (e.g. msg_*) used when
+     *                               replaying the message as an input item in stateless mode.
      */
     public function __construct(
         protected ?string $role = null,
@@ -44,7 +47,16 @@ class Message implements OwnableMessageInterface, JsonSerializable
         protected array $parameters = [],
         protected ?int $inputTokens = null,
         protected ?int $outputTokens = null,
+        protected ?string $itemId = null,
     ) {
+    }
+
+    /**
+     * Get the Responses API item id (msg_*), if any.
+     */
+    public function itemId(): ?string
+    {
+        return $this->itemId;
     }
 
     /**
@@ -115,6 +127,41 @@ class Message implements OwnableMessageInterface, JsonSerializable
     }
 
     /**
+     * Convert the message to a portable array suitable for persistence
+     * (e.g. via ConversationSerializer). Subclasses override this to
+     * capture their own shape.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSerializedArray(): array
+    {
+        return [
+            'role' => $this->role,
+            'content' => $this->content,
+            'parameters' => $this->parameters,
+            'usage' => $this->usage(),
+            'item_id' => $this->itemId,
+        ];
+    }
+
+    /**
+     * Rehydrate a message from its persisted array representation.
+     *
+     * @param array<string, mixed> $data
+     */
+    public static function fromSerializedArray(array $data): static
+    {
+        return new static(
+            role: $data['role'] ?? null,
+            content: $data['content'] ?? null,
+            parameters: $data['parameters'] ?? [],
+            inputTokens: $data['usage']['input_tokens'] ?? null,
+            outputTokens: $data['usage']['output_tokens'] ?? null,
+            itemId: $data['item_id'] ?? null,
+        );
+    }
+
+    /**
      * Prepare the message for JSON serialization.
      *
      * Formats the message in a structure suitable for LLM API requests,
@@ -124,6 +171,20 @@ class Message implements OwnableMessageInterface, JsonSerializable
      */
     public function jsonSerialize(): array
     {
+        // When an assistant message carries a Responses API item id (msg_*),
+        // emit the Responses input-item shape so it can be replayed in stateless mode.
+        if ($this->role === self::ROLE_ASSISTANT && $this->itemId !== null) {
+            return array_filter([
+                'type' => 'message',
+                'id' => $this->itemId,
+                'role' => self::ROLE_ASSISTANT,
+                'content' => $this->content !== null
+                    ? [['type' => 'output_text', 'text' => $this->content]]
+                    : null,
+                ...$this->parameters,
+            ], fn ($value) => $value !== null);
+        }
+
         return array_filter([
             'role' => $this->role,
             'content' => $this->content,

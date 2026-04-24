@@ -265,7 +265,7 @@ abstract class BasesResponsesTransporter implements Transporter
     {
         $items = [];
         foreach ($response->output as $item) {
-            if (!$item instanceof OutputReasoning) {
+            if (! $item instanceof OutputReasoning) {
                 continue;
             }
 

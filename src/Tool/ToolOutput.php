@@ -32,4 +32,26 @@ class ToolOutput extends Message
             'type' => 'function_call_output',
         ];
     }
+
+    public function toSerializedArray(): array
+    {
+        return [
+            'type' => 'tool_output',
+            'content' => $this->content(),
+            'call_id' => $this->parameters['call_id'] ?? null,
+            'usage' => $this->usage(),
+        ];
+    }
+
+    /**
+     * @param array{content?:string|null, call_id?:string|null} $data
+     * @return static
+     */
+    public static function fromSerializedArray(array $data): static
+    {
+        return new static(
+            content: (string) ($data['content'] ?? ''),
+            toolCallId: (string) ($data['call_id'] ?? ''),
+        );
+    }
 }

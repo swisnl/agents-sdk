@@ -10,6 +10,7 @@ class Payload
         public int $choice = 0,
         public ?int $inputTokens = null,
         public ?int $outputTokens = null,
+        public ?string $itemId = null,
     ) {
     }
 

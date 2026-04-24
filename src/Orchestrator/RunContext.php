@@ -190,6 +190,7 @@ class RunContext
             content: $payload->content,
             inputTokens: $payload->inputTokens,
             outputTokens: $payload->outputTokens,
+            itemId: $payload->itemId,
         );
     }
 

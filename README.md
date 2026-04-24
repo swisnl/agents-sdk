@@ -110,6 +110,23 @@ $agent = new Agent(
 $agent->withTransporter(new ChatCompletionsTransporter());
 ```
 
+## Stateful vs stateless Responses API
+
+The default `ResponsesTransporter` runs the Responses API in **stateless** mode: every request sends `store: false` plus `include: ['reasoning.encrypted_content']`, and the full conversation — including reasoning items with their encrypted blob — is replayed on each turn. Nothing is retained on OpenAI's servers, which makes it safe for ZDR-compliant orgs and keeps conversations replayable past the ~30 day server-state expiry.
+
+If you need the legacy behaviour (server-side state via `previous_response_id`, smaller request payloads, no encrypted reasoning returned to the client), opt in explicitly:
+
+```php
+use Swis\Agents\Transporters\StatefulResponsesTransporter;
+
+$agent = new Agent(
+    name: 'Agent Name',
+    transporter: new StatefulResponsesTransporter(),
+);
+```
+
+A conversation captured in stateful mode cannot be resumed statelessly without losing reasoning continuity — stateful runs never see the encrypted reasoning items.
+
 ## Defining Tools
 
 Tools are capabilities that agents can use to perform actions. To create a custom tool:

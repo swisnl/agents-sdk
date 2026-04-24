@@ -5,6 +5,7 @@ namespace Swis\Agents\Tests\Integration;
 use PHPUnit\Framework\MockObject\MockObject;
 use Swis\Agents\Agent;
 use Swis\Agents\Mcp\McpConnection;
+use Swis\Agents\Response\ReasoningItem;
 use Swis\Agents\Transporters\ChatCompletionTransporter;
 use Swis\McpClient\Client;
 use Swis\McpClient\Results\CallToolResult;
@@ -59,13 +60,15 @@ class McpAgentTest extends BaseOrchestratorTestCase
         // Verify the conversation flow
         $conversation = $this->orchestrator->context->conversation();
 
+        $this->assertInstanceOf(ReasoningItem::class, $conversation[2]);
+
         // Verify the tool call
-        $this->assertArrayHasKey('expression', $conversation[2]->arguments);
-        $this->assertEquals('5 + 7', $conversation[2]->arguments['expression']);
+        $this->assertArrayHasKey('expression', $conversation[3]->arguments);
+        $this->assertEquals('5 + 7', $conversation[3]->arguments['expression']);
 
         // Verify the tool response
-        $this->assertEquals('tool', $conversation[3]->role());
-        $this->assertEquals('12', $conversation[3]->content());
+        $this->assertEquals('tool', $conversation[4]->role());
+        $this->assertEquals('12', $conversation[4]->content());
     }
 
     public function testMcpAgentInteractionWitChatCompletions()

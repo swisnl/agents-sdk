@@ -24,22 +24,52 @@ class ToolCall extends Message
      * Create a new tool call message.
      *
      * @param string $tool The name of the tool to call
-     * @param string $id Unique identifier for this tool call
+     * @param string $id Unique identifier for this tool call (call_id, e.g. call_*)
      * @param string|null $argumentsPayload JSON string containing the arguments for the tool
+     * @param string|null $itemId Optional Responses API item id (fc_*) used when replaying
+     *                            the tool call as an input item in stateless mode.
      * @throws UnparsableToolCallException
      */
-    public function __construct(public string $tool, public string $id, public ?string $argumentsPayload = null)
-    {
+    public function __construct(
+        public string $tool,
+        public string $id,
+        public ?string $argumentsPayload = null,
+        ?string $itemId = null,
+    ) {
         parent::__construct(
-            parameters: [
+            parameters: array_filter([
                 'type' => 'function_call',
+                'id' => $itemId,
                 'call_id' => $id,
                 'name' => $tool,
                 'arguments' => $argumentsPayload,
-            ]
+            ], fn ($value) => $value !== null),
+            itemId: $itemId,
         );
 
         $this->parseArgumentsPayload($argumentsPayload, $tool);
+    }
+
+    public function toSerializedArray(): array
+    {
+        return [
+            'type' => 'tool_call',
+            'tool' => $this->tool,
+            'id' => $this->id,
+            'arguments_payload' => $this->argumentsPayload,
+            'item_id' => $this->itemId(),
+            'usage' => $this->usage(),
+        ];
+    }
+
+    public static function fromSerializedArray(array $data): static
+    {
+        return new static(
+            tool: $data['tool'],
+            id: $data['id'],
+            argumentsPayload: $data['arguments_payload'] ?? null,
+            itemId: $data['item_id'] ?? null,
+        );
     }
 
     /**

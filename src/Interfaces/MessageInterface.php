@@ -20,5 +20,14 @@ interface MessageInterface
      */
     public function usage(): array;
 
+    /**
+     * Convert the message to a portable array suitable for persistence.
+     *
+     * Distinct from jsonSerialize(), which produces the LLM API payload shape.
+     *
+     * @return array<string, mixed>
+     */
+    public function toSerializedArray(): array;
+
     public function __toString(): string;
 }

@@ -195,7 +195,7 @@ abstract class BasesResponsesTransporter implements Transporter
 
             $content .= implode($contents);
             $role = $item->role;
-            $itemId = $item->id ?? $itemId;
+            $itemId = $item->id ?: $itemId;
         }
 
         return new Payload(
@@ -270,7 +270,7 @@ abstract class BasesResponsesTransporter implements Transporter
             }
 
             $items[] = new ReasoningItem(
-                id: $item->id ?? '',
+                id: $item->id,
                 encryptedContent: $item->encryptedContent ?? null,
                 summary: $this->extractReasoningSummary($item),
             );
@@ -282,19 +282,12 @@ abstract class BasesResponsesTransporter implements Transporter
     /**
      * Normalise the summary entries of a reasoning output item.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, array{text: string, type: string}>
      */
     protected function extractReasoningSummary(OutputReasoning $item): array
     {
-        $summary = $item->summary ?? [];
-        $normalised = [];
-        foreach ($summary as $entry) {
-            $normalised[] = array_filter([
-                'type' => $entry->type ?? 'summary_text',
-                'text' => $entry->text ?? null,
-            ], fn ($value) => $value !== null);
-        }
-
-        return $normalised;
+        return array_map(function ($summary) {
+            return $summary->toArray();
+        }, $item->summary);
     }
 }

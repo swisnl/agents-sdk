@@ -46,7 +46,7 @@ class StreamedResponseWrapper implements IteratorAggregate
     {
         $toolCalls = $response->choices[0]->delta->toolCalls;
         foreach ($toolCalls as $toolCall) {
-            if (isset($toolCall->id, $toolCall->function, $toolCall->function->name)) {
+            if (isset($toolCall->id, $toolCall->function->name)) {
                 $this->currentToolCallId = $toolCall->id;
                 $this->capturedToolCalls[$this->currentToolCallId] = [
                     'name' => $toolCall->function->name,

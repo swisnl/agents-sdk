@@ -2,6 +2,15 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.20.1 - 2026-06-22
+
+### What's Changed
+
+* build(deps): bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/swisnl/agents-sdk/pull/57
+* Fixed an issues with assistant messages appearing twice at the end of the conversation context
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.20.0...0.20.1
+
 ## 0.20.0 - 2026-04-24
 
 ### Breaking changes

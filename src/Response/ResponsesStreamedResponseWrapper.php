@@ -163,6 +163,10 @@ class ResponsesStreamedResponseWrapper implements IteratorAggregate
             }
 
             if ($response->event === 'response.output_item.done' && $response->response instanceof OutputItem) {
+                if ($response->response->item instanceof OutputMessage && $response->response->item->role === Message::ROLE_ASSISTANT) {
+                    $this->assistantItemId = $response->response->item->id ?? $this->assistantItemId;
+                }
+
                 match (get_class($response->response->item)) {
                     OutputMessage::class => $context->addMessage($this->messageFromOutputMessage($response->response->item), $this->agent),
                     OutputReasoning::class => $context->addMessage($this->messageFromOutputReasoning($response->response->item), $this->agent),

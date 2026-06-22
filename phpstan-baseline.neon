@@ -175,8 +175,20 @@ parameters:
 			path: src/Response/ResponsesStreamedResponseWrapper.php
 
 		-
+			message: '#^Property OpenAI\\Responses\\Responses\\Output\\OutputMessage\:\:\$id \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: src/Response/ResponsesStreamedResponseWrapper.php
+
+		-
 			message: '#^Result of && is always false\.$#'
 			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: src/Response/ResponsesStreamedResponseWrapper.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''assistant'' and ''assistant'' will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
 			count: 1
 			path: src/Response/ResponsesStreamedResponseWrapper.php
 

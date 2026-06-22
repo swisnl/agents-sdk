@@ -139,13 +139,18 @@ abstract class BasesResponsesTransporter implements Transporter
             $lastPayload = $responsePayload;
         }
 
-        if (! empty($message) && isset($lastPayload)) {
+        if (! empty($message) && isset($lastPayload) && $this->streamedResponseNeedsFinalAssistantMessage($streamedResponse)) {
             $lastPayload->content = $message;
             $context->addAgentMessage($lastPayload, $agent);
             if ($context->lastMessage() !== null) {
                 $context->observerInvoker()->agentOnResponse($context, $agent, $context->lastMessage());
             }
         }
+    }
+
+    protected function streamedResponseNeedsFinalAssistantMessage(ResponsesStreamedResponseWrapper $streamedResponse): bool
+    {
+        return $streamedResponse->assistantItemId() === null;
     }
 
     /**

@@ -2,6 +2,10 @@
 
 All notable changes to `agents-sdk` will be documented in this file.
 
+## 0.20.2 - 2026-07-14
+
+**Full Changelog**: https://github.com/swisnl/agents-sdk/compare/0.20.1...0.20.2
+
 ## 0.20.1 - 2026-06-22
 
 ### What's Changed

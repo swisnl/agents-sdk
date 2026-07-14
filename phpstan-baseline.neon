@@ -257,3 +257,9 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Tracing/Trace.php
+
+		-
+			message: '#^Parameter \$argumentsPayload of class Swis\\Agents\\Response\\ToolCall constructor expects string\|null, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Transporters/BasesResponsesTransporter.php
